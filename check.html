@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>公開前チェック | 中標津浦島物語</title>
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<style>
+/* 公開前チェック用の管理ページ（検索結果には出ません） */
+:root{--ink:#111719;--paper:#F5F5F2;--paper-2:#EAEBE6;--moss:#536C5B;--stone:#5C6460;--rule:#D5D8D0;--ok:#3E7A55;--warn:#A0712A;--ng:#B0473A;
+  --f:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:48px max(16px,env(safe-area-inset-right,0px)) 96px max(16px,env(safe-area-inset-left,0px))}
+.k{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--stone);margin:0}
+h1{font-size:clamp(24px,4vw,34px);font-weight:600;letter-spacing:.04em;margin:8px 0 6px}
+.lead{color:var(--stone);margin:0 0 28px}
+.sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:40px}
+.sum div{background:var(--paper);padding:16px 18px}
+.sum b{display:block;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.sum span{font-size:12px;color:var(--stone)}
+.sum .ok b{color:var(--ok)}.sum .warn b{color:var(--warn)}.sum .ng b{color:var(--ng)}
+section{margin-top:40px}
+h2{font-size:15px;letter-spacing:.08em;margin:0 0 4px;padding-bottom:10px;border-bottom:1px solid var(--ink);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h2 small{font-weight:400;color:var(--stone);font-size:12px}
+ul{list-style:none;margin:0;padding:0}
+li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.st{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;margin-top:1px}
+.st.ok{background:var(--ok)}.st.warn{background:var(--warn)}.st.ng{background:var(--ng)}.st.info{background:var(--stone)}
+.t{font-weight:600}
+.d{grid-column:2;color:var(--stone);font-size:13px;overflow-wrap:anywhere}
+code{font-family:var(--mono);font-size:12px;background:var(--paper-2);padding:1px 5px}
+.fix{grid-column:2;background:#fff;border:1px solid var(--rule);padding:12px 14px;margin-top:6px;font-size:13px}
+.fix button{font:inherit;font-size:12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:6px 12px;margin-top:8px;cursor:pointer}
+.filter{display:flex;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+.filter button{font:inherit;font-size:12px;padding:6px 12px;border:1px solid var(--rule);background:#fff;cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+body.only-issues li.is-ok{display:none}
+a{color:var(--moss)}
+.note{margin-top:48px;font-size:12px;color:var(--stone)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="k">Nakashibetsu Urashima Story — Pre-launch check</p>
+  <h1>公開前チェック</h1>
+  <p class="lead">このページは公開前の確認用です（検索結果には表示されません）。<b>公開したURLでこのページを開く</b>と、URL設定・写真・エピソード情報などを自動で確認します。</p>
+  <div class="sum" id="sum"></div>
+  <div class="filter"><button id="fAll" aria-pressed="true">すべて表示</button><button id="fIssue" aria-pressed="false">要対応だけ表示</button></div>
+  <div id="out"><p>確認しています…</p></div>
+  <p class="note">手作業で確認する項目は、ZIPに同梱の <code>PUBLISH-CHECKLIST.md</code> にまとめています。<br><a href="./">← サイトに戻る</a></p>
+</main>
+<script src="assets/js/data.js"></script>
+<script>
+(async () => {
+  const out = document.getElementById("out"), sums = { ok:0, warn:0, ng:0 };
+  const sections = [];
+  let cur;
+  const sec = (title, sub="") => { cur = { title, sub, items: [] }; sections.push(cur); };
+  const add = (st, t, d="", fix="") => { cur.items.push({ st, t, d, fix }); if (sums[st] !== undefined) sums[st]++; };
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const exists = async url => { try { const r = await fetch(url, { method: "GET", cache: "no-store" }); return r.ok; } catch (_) { return false; } };
+  const text = async url => { try { const r = await fetch(url, { cache: "no-store" }); return r.ok ? await r.text() : null; } catch (_) { return null; } };
+
+  /* ---------- 1. 公開URL ---------- */
+  const here = new URL("./", location.href).href;            // 実際の公開URL（このページのフォルダ）
+  const isLocal = !/^https:$/.test(location.protocol) || /^(localhost|127\.|\[::1\])/.test(location.hostname);
+  sec("1. 公開URLの設定", "SNSで共有されたときの表示・検索エンジン向けの設定です");
+  const html = await text("index.html");
+  let expected = null;
+  if (!html) add("ng", "index.html が読み込めません", "このページを index.html と同じフォルダに置いてください。");
+  else {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const canon = doc.querySelector('link[rel="canonical"]')?.href || "";
+    expected = canon;
+    add(isLocal ? "info" : "ok", "現在このページを開いているURL", `<code>${esc(here)}</code>${isLocal ? "<br>※ パソコン内やローカル環境で開いています。公開後のURLで開くと正しく判定できます。" : ""}`);
+    const fixMsg = from => `ZIPの各ファイルで <code>${esc(from)}</code> をすべて <code>${esc(here)}</code> に置き換えてください（対象：index.html / 404.html / robots.txt / sitemap.xml）。<br><button data-copy="${esc(here)}">正しいURLをコピー</button>`;
+    const checks = [
+      ["canonical（正式なURL）", canon],
+      ["og:url（SNS共有のURL）", doc.querySelector('meta[property="og:url"]')?.content],
+      ["og:image（SNS共有の画像）", doc.querySelector('meta[property="og:image"]')?.content?.replace(/assets\/img\/ogp\.jpg$/, "")],
+      ["twitter:image", doc.querySelector('meta[name="twitter:image"]')?.content?.replace(/assets\/img\/ogp\.jpg$/, "")]
+    ];
+    try { const ld = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent); checks.push(["構造化データ（JSON-LD）", ld["@graph"][0].url]); } catch (_) { checks.push(["構造化データ（JSON-LD）", ""]); }
+    for (const [label, val] of checks) {
+      if (!val) { add("ng", label, "設定が見つかりません。"); continue; }
+      const match = val === here;
+      add(match ? "ok" : (isLocal ? "info" : "ng"), label, `<code>${esc(val)}</code>`, match || isLocal ? "" : fixMsg(val));
+    }
+    const robots = await text("robots.txt"), sitemap = await text("sitemap.xml"), nf = await text("404.html");
+    add(robots && robots.includes(here + "sitemap.xml") ? "ok" : (isLocal ? "info" : "ng"), "robots.txt の Sitemap 行", robots ? `<code>${esc((robots.match(/Sitemap:.*/) || [""])[0])}</code>` : "robots.txt がありません");
+    add(sitemap && sitemap.includes(`<loc>${here}</loc>`) ? "ok" : (isLocal ? "info" : "ng"), "sitemap.xml の URL", sitemap ? `<code>${esc((sitemap.match(/<loc>(.*?)<\/loc>/) || ["",""])[1])}</code>` : "sitemap.xml がありません");
+    add(nf && nf.includes(here) ? "ok" : (isLocal ? "info" : "warn"), "404.html の「サイトに戻る」リンク", nf ? "" : "404.html がありません");
+  }
+
+  /* ---------- 2. 共通ファイル ---------- */
+  sec("2. サイト共通のファイル");
+  for (const [f, label] of [["assets/css/style.css","デザイン（CSS）"],["assets/js/main.js","動作（JavaScript）"],["assets/img/ogp.jpg","SNS共有画像（1200×630）"],["assets/img/favicon.svg","ファビコン"],["assets/img/apple-touch-icon.png","ホーム画面アイコン"]])
+    add(await exists(f) ? "ok" : "ng", label, `<code>${f}</code>`);
+  add("warn", "SNS共有画像（ogp.jpg）を実写に差し替えたか", "現在は仮ビジュアルから作った画像です。実際の写真で 1200×630 の画像を作り、同じ名前で上書きしてください。");
+
+  /* ---------- 3. 写真・動画 ---------- */
+  sec("3. 写真・動画", "空欄の場所は仮ビジュアルが表示されます");
+  const media = async (label, path, where) => {
+    if (!path) { add("warn", `${label}：未設定`, `data.js の <code>${where}</code>`); return; }
+    const ok = await exists(path);
+    add(ok ? "ok" : "ng", `${label}：${ok ? "設定済み" : "ファイルが見つかりません"}`, `<code>${esc(path)}</code>${ok ? "" : "<br>ファイル名の大文字・小文字（.JPG と .jpg）や、フォルダの場所を確認してください。"}`);
+  };
+  const h = SITE.media.hero;
+  await media("ファーストビュー動画（PC）", h.video, "media.hero.video");
+  if (h.videoMobile) await media("ファーストビュー動画（スマホ）", h.videoMobile, "media.hero.videoMobile"); else add("info", "ファーストビュー動画（スマホ）：未設定（任意）", "空欄の場合はPC用の動画を使います。");
+  await media("ファーストビュー静止画（ポスター）", h.poster, "media.hero.poster");
+  for (const [k, label] of [["prologue-portrait","プロローグ縦写真"],["prologue-wide","プロローグ横写真"],["about","ABOUTの写真"]]) await media(label, SITE.media[k]?.src, `media["${k}"].src`);
+  for (const e of SITE.episodes) await media(`EP.${e.no} ポスター`, e.image, `episodes（${e.id}）の image`);
+  for (const p of SITE.places) await media(`スポット「${p.name}」の写真`, p.image, `places（${p.id}）の image`);
+
+  /* ---------- 4. エピソード ---------- */
+  sec("4. エピソード情報", `全${SITE.episodes.length}話（トップページには最新${SITE.homeEpisodes || 4}本）`);
+  const ids = SITE.episodes.map(e => e.id), nos = SITE.episodes.map(e => e.no);
+  add(new Set(ids).size === ids.length ? "ok" : "ng", "エピソードIDの重複なし", ids.join(" / "));
+  add(new Set(nos).size === nos.length ? "ok" : "ng", "話数（no）の重複なし", nos.map(n => "EP." + n).join(" / "));
+  for (const e of SITE.episodes) {
+    const miss = [];
+    if (!e.tiktok) miss.push("TikTok投稿URL");
+    if (!e.instagram) miss.push("Instagram投稿URL");
+    if (!e.published) miss.push("公開日");
+    if (e.draft) miss.push("紹介文が仮（draft: true）");
+    const badPlace = (e.places || []).filter(id => !SITE.places.some(p => p.id === id));
+    if (badPlace.length) add("ng", `EP.${e.no}「${e.title}」：存在しないスポットID`, badPlace.join(", "));
+    add(miss.length ? "warn" : "ok", `EP.${e.no}「${e.title}」`, miss.length ? "未入力：" + miss.join("、") : "すべて入力済み");
+  }
+
+  /* ---------- 5. スポット ---------- */
+  sec("5. スポット（観光情報）", "未入力の項目はサイトに表示されません。確認できたものから入力してください");
+  for (const p of SITE.places) {
+    const have = [["address","所在地"],["hours","営業時間"],["closed","定休日"],["access","アクセス"],["official","公式サイト"],["lat","座標"]].filter(([k]) => p[k] != null && p[k] !== "").map(([,l]) => l);
+    const need = [];
+    if (!p.address) need.push("所在地");
+    if (p.lat == null || p.lng == null) need.push("座標（Googleマップで正確な地点を開くため）");
+    if (p.draft) need.push("説明文が仮（draft: true）");
+    if (have.length && !p.checkedAt) need.push("情報の確認日（checkedAt）");
+    add(need.length ? "warn" : "ok", `No.${p.no}「${p.name}」`, (have.length ? "入力済み：" + have.join("、") + "<br>" : "") + (need.length ? "未入力：" + need.join("、") : ""));
+  }
+
+  /* ---------- 6. リンク・表示設定 ---------- */
+  sec("6. リンクと表示設定");
+  add(SITE.links.tiktok ? "ok" : "ng", "TikTok アカウント", `<code>${esc(SITE.links.tiktok)}</code>`);
+  add(SITE.links.instagram ? "ok" : "ng", "Instagram アカウント", `<code>${esc(SITE.links.instagram)}</code>`);
+  add(SITE.links.form ? "ok" : "warn", "情報提供フォーム", SITE.links.form ? `<code>${esc(SITE.links.form)}</code>` : "未設定（サイトでは「準備中」と表示されます）");
+  add(SITE.links.contact ? "ok" : "warn", "お問い合わせ先", SITE.links.contact ? `<code>${esc(SITE.links.contact)}</code>` : "未設定（サイトでは「準備中」と表示されます）");
+  add(SITE.showDraftLabels ? "warn" : "ok", "「仮テキスト」「仮画像」ラベル", SITE.showDraftLabels ? "表示中です。本番の文章・写真がそろったら data.js の <code>showDraftLabels</code> を <code>false</code> にしてください。" : "非表示");
+
+  /* ---------- render ---------- */
+  const icon = { ok:"✓", warn:"!", ng:"×", info:"i" };
+  out.innerHTML = sections.map(s => `<section><h2>${s.title}<small>${s.sub}</small></h2><ul>${s.items.map(i =>
+    `<li class="is-${i.st}"><span class="st ${i.st}" aria-label="${{ok:"OK",warn:"要確認",ng:"要修正",info:"情報"}[i.st]}">${icon[i.st]}</span><span class="t">${i.t}</span>${i.d ? `<span class="d">${i.d}</span>` : ""}${i.fix ? `<div class="fix">${i.fix}</div>` : ""}</li>`).join("")}</ul></section>`).join("");
+  document.getElementById("sum").innerHTML = `<div class="ok"><b>${sums.ok}</b><span>OK</span></div><div class="warn"><b>${sums.warn}</b><span>要確認（公開前に用意）</span></div><div class="ng"><b>${sums.ng}</b><span>要修正</span></div>`;
+  out.addEventListener("click", ev => {
+    const b = ev.target.closest("[data-copy]"); if (!b) return;
+    navigator.clipboard?.writeText(b.dataset.copy).then(() => b.textContent = "コピーしました", () => b.textContent = b.dataset.copy);
+  });
+  const fA = document.getElementById("fAll"), fI = document.getElementById("fIssue");
+  fA.onclick = () => { document.body.classList.remove("only-issues"); fA.setAttribute("aria-pressed","true"); fI.setAttribute("aria-pressed","false"); };
+  fI.onclick = () => { document.body.classList.add("only-issues"); fI.setAttribute("aria-pressed","true"); fA.setAttribute("aria-pressed","false"); };
+  document.body.dataset.done = "1";
+})();
+</script>
+</body>
+</html>

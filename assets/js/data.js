@@ -81,6 +81,47 @@ const SITE = {
       image: "", scene: "panorama",
       tiktok: "", instagram: "", published: "",
       places: ["kaiyodai"]
+    },
+    {
+      id: "ep-04", no: "04",
+      title: "ラ・キンコ", titleEn: "",   // titleEn：英語表記（未定なら空欄のままでOK）
+      category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
+      lead: "EP.04の舞台は「ラ・キンコ」。",
+      draft: true,
+      image: "", scene: "town",
+      tiktok: "", instagram: "", published: "",
+      places: ["la-kinko"]
+    },
+    {
+      id: "ep-05", no: "05",
+      title: "夢みるケーキ屋 ポルテ", titleEn: "",   // titleEn：英語表記（未定なら空欄のままでOK）
+      category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
+      lead: "EP.05の舞台は「夢みるケーキ屋 ポルテ」。",
+      draft: true,
+      image: "", scene: "cafe",
+      tiktok: "", instagram: "", published: "",
+      places: ["porte"]
+    },
+    {
+      id: "ep-06", no: "06",
+      title: "らー麺 たら福", titleEn: "",   // titleEn：英語表記（未定なら空欄のままでOK）
+      category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
+      lead: "EP.06の舞台は「らー麺 たら福」。",
+      draft: true,
+      image: "", scene: "food",
+      tiktok: "", instagram: "", published: "",
+      places: ["tarafuku"]
+    },
+    {
+      id: "ep-07", no: "07",
+      title: "GLOW -Amusement Bar-", titleEn: "GLOW -AMUSEMENT BAR-",
+      posterTitle: "GLOW",   // ポスターの縦書きタイトル（長い名前を短く見せたいときだけ指定）
+      category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
+      lead: "EP.07の舞台は「GLOW -Amusement Bar-」。",
+      draft: true,
+      image: "", scene: "shelf",
+      tiktok: "", instagram: "", published: "",
+      places: ["glow"]
     }
   ],
 
@@ -105,7 +146,7 @@ const SITE = {
       address: null, hours: null, closed: null, price: null,
       access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
       mapQuery: "根室中標津空港", lat: null, lng: null,
-      schematic: [46, 68]
+      schematic: [44, 72]
     },
     {
       id: "milk-road", no: "02",
@@ -116,7 +157,7 @@ const SITE = {
       address: null, hours: null, closed: null, price: null,
       access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
       mapQuery: "ミルクロード 中標津", lat: null, lng: null,
-      schematic: [38, 36]
+      schematic: [33, 32]
     },
     {
       id: "kaiyodai", no: "03",
@@ -128,6 +169,50 @@ const SITE = {
       access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
       mapQuery: "開陽台", lat: null, lng: null,
       schematic: [26, 17]
+    },
+    {
+      id: "la-kinko", no: "04",
+      name: "ラ・キンコ", nameEn: "",
+      cat: "FOOD", scene: "town", image: "",
+      desc: "EP.04の舞台になったお店。",
+      draft: true,
+      address: null, hours: null, closed: null, price: null,
+      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
+      mapQuery: "ラ・キンコ 中標津", lat: null, lng: null,
+      schematic: [44, 45]
+    },
+    {
+      id: "porte", no: "05",
+      name: "夢みるケーキ屋 ポルテ", nameEn: "",
+      cat: "FOOD", scene: "cafe", image: "",
+      desc: "EP.05の舞台になったお店。",
+      draft: true,
+      address: null, hours: null, closed: null, price: null,
+      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
+      mapQuery: "夢みるケーキ屋 ポルテ 中標津", lat: null, lng: null,
+      schematic: [60, 42]
+    },
+    {
+      id: "tarafuku", no: "06",
+      name: "らー麺 たら福", nameEn: "",
+      cat: "FOOD", scene: "food", image: "",
+      desc: "EP.06の舞台になったお店。",
+      draft: true,
+      address: null, hours: null, closed: null, price: null,
+      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
+      mapQuery: "らー麺 たら福 中標津", lat: null, lng: null,
+      schematic: [54, 57]
+    },
+    {
+      id: "glow", no: "07",
+      name: "GLOW -Amusement Bar-", nameEn: "",
+      cat: "FOOD", scene: "shelf", image: "",
+      desc: "EP.07の舞台になったお店。",
+      draft: true,
+      address: null, hours: null, closed: null, price: null,
+      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
+      mapQuery: "GLOW -Amusement Bar- 中標津", lat: null, lng: null,
+      schematic: [67, 55]
     }
   ]
 };

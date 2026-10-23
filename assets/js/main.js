@@ -213,7 +213,13 @@ function paintCanvas(fig){
   const rect=fig.getBoundingClientRect();if(rect.width<2||rect.height<2)return;
   let cv=fig.querySelector("canvas");
   if(!cv){cv=document.createElement("canvas");cv.setAttribute("aria-hidden","true");fig.prepend(cv);
-    if(SITE.showDraftLabels&&!fig.closest(".poster")){const t=document.createElement("span");t.className="ph-tag";t.textContent=fig.classList.contains("hero-media")?"MOVIE · 仮映像":"PHOTO · 仮画像";fig.appendChild(t)}}
+    if(SITE.showDraftLabels&&!fig.closest(".poster")){
+      if(fig.classList.contains("hero-media")){
+        // ファーストビューは文字と重ならないよう、左上のメタ情報の行に表示
+        const meta=document.querySelector(".hero-meta");
+        if(meta&&!meta.querySelector(".hero-ph")){const t=document.createElement("p");t.className="eyebrow hero-ph";t.textContent="Movie — 仮映像（撮影準備中）";meta.appendChild(t)}
+      }else{const t=document.createElement("span");t.className="ph-tag";t.textContent="IMAGE · 仮イメージ";fig.appendChild(t)}
+    }}
   const dpr=Math.min(window.devicePixelRatio||1,1.75),w=Math.round(rect.width*dpr),h=Math.round(rect.height*dpr);
   cv.width=w;cv.height=h;const c=cv.getContext("2d");
   (S[fig.dataset.scene]||S.field)(c,w,h,rng(hash(fig.dataset.seed||fig.dataset.scene)));finish(c,w,h);
@@ -268,8 +274,15 @@ function gmapsURL(p){
 }
 const pending = txt => `<span class="muted">${txt||"確認中"}</span>`;
 const DRAFT = cond => SITE.showDraftLabels && cond ? '<span class="draft">仮テキスト</span>' : "";
-const PH = img => SITE.showDraftLabels && !img ? '<span class="p-ph">仮画像</span>' : "";
+const PH = img => SITE.showDraftLabels && !img ? '<span class="p-ph">仮イメージ</span>' : "";
+// 写真がまだ無いときの注意書き（仮ビジュアルを実際の店舗・風景と誤解されないように）
+const PH_NOTE = img => !img ? '<p class="ph-note">※ 写真は撮影準備中のため、仮のイメージを表示しています。実際の店舗・風景とは異なります。</p>' : "";
 document.documentElement.classList.toggle("show-draft", !!SITE.showDraftLabels);
+// ポスターに縦書きで載せるタイトル（長い名前は posterTitle で短くできます）
+function posterTitle(ep){
+  const t=ep.posterTitle||ep.title, latin=/^[\x20-\x7E]+$/.test(t);
+  return `<span class="p-title${latin?" latin":""}" style="--len:${[...t].length}">${esc(t)}</span>`;
+}
 function fmtDate(d){ if(!d) return ""; const [y,m,dd]=d.split("-"); return `${y}.${m}.${dd}`; }
 
 /* =========================================================
@@ -280,7 +293,7 @@ function storyCard(ep){
   return `<article class="story rv"><a class="story-link" href="#${ep.id}" data-open="${ep.id}">
     <figure class="frame poster" data-scene="${ep.scene}" data-seed="${ep.id}" data-src="${esc(ep.image)}" data-alt="${esc(ep.title)}">
       <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${ep.no}</span><span class="p-tags">${ep===LATEST?'<span class="p-badge">LATEST</span>':""}${PH(ep.image)}</span>
-      <span class="p-title" style="--len:${[...ep.title].length}">${esc(ep.title)}</span><span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no} — ${esc(ep.titleEn)}</span></div>
+      ${posterTitle(ep)}<span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no}${ep.titleEn?` — ${esc(ep.titleEn)}`:""}</span></div>
     </figure>
     <div class="story-meta"><p class="story-cat"><span>${esc(ep.category)}</span>${esc(ep.categoryJa)}</p>
       <h3 class="story-title"><span class="sr">EP.${ep.no} </span>${esc(ep.title)}</h3><p class="story-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
@@ -302,7 +315,7 @@ pg.innerHTML=SITE.places.map(p=>{
   return `<article class="place rv" data-cat="${p.cat}"><a href="#spot-${p.id}" data-open="spot-${p.id}">
   <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
   <div class="place-meta"><span class="place-no" aria-label="スポット番号">${p.no}</span><span class="place-cat">${CAT[p.cat].en} <span class="cat-ja">／${CAT[p.cat].ja}</span></span>
-  <h3>${esc(p.name)}</h3><p class="place-en">${esc(p.nameEn)}</p><p class="place-desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
+  <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="place-desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
   ${eps.length?`<p class="place-ep">${eps.map(e=>`EP.${e.no}「${esc(e.title)}」`).join(" / ")}に登場</p>`:""}</div></a></article>`}).join("")
   +`<p class="place-empty" id="placeEmpty" hidden>このカテゴリのスポットは、取材をしたあとに追加していきます。<br>おすすめの場所があれば、<a href="#join">情報募集</a>から教えてください。</p>`;
 fl.innerHTML=SITE.categories.map((c,i)=>`<button class="fbtn" data-f="${c.id}" aria-pressed="${i===0}"><b>${c.en}<sup>${catCount(c.id)}</sup></b><small>${c.ja}</small></button>`).join("");
@@ -369,7 +382,7 @@ function selectSpot(id){
   spotIdx.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
   panel.innerHTML=`<figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
   <div class="panel-body"><div class="panel-top"><span class="panel-no">${p.no}</span><span class="place-cat">${CAT[p.cat].en}<br><span class="cat-ja">${CAT[p.cat].ja}</span></span></div>
-  <h3>${esc(p.name)}</h3><p class="place-en">${esc(p.nameEn)}</p><p class="desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
+  <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
   ${factsHTML(p)}
   <div class="panel-actions">${gmapsBtn(p)}<a class="btn" href="#spot-${p.id}" data-open="spot-${p.id}">詳しく見る →</a></div>
   ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは「'+esc(p.mapQuery)+'」の検索結果が開きます。</p>':""}</div>`;
@@ -397,14 +410,15 @@ function storySheet(ep){
   const pls=(ep.places||[]).map(id=>PL[id]).filter(Boolean);
   return `<article class="sd wrap">
     <figure class="frame poster sd-poster" data-scene="${ep.scene}" data-seed="${ep.id}" data-src="${esc(ep.image)}" data-alt="${esc(ep.title)}">
-      <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${ep.no}</span><span class="p-tags">${PH(ep.image)}</span><span class="p-title" style="--len:${[...ep.title].length}">${esc(ep.title)}</span><span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no} — ${esc(ep.titleEn)}</span></div>
+      <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${ep.no}</span><span class="p-tags">${PH(ep.image)}</span>${posterTitle(ep)}<span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no}${ep.titleEn?` — ${esc(ep.titleEn)}`:""}</span></div>
     </figure>
     <div class="sd-text">
       <p class="story-cat"><span>${esc(ep.category)}</span>${esc(ep.categoryJa)}${ep.published?`<em>${fmtDate(ep.published)}</em>`:""}</p>
       <h2 class="sd-title" id="sheetTitle"><span class="sd-no">EP.${ep.no}</span>${esc(ep.title)}</h2>
-      <p class="sd-en">${esc(ep.titleEn)}</p>
+      ${ep.titleEn?`<p class="sd-en">${esc(ep.titleEn)}</p>`:""}
       <p class="sd-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
       ${watchBtns(ep)}
+      ${PH_NOTE(ep.image)}
       ${pls.length?`<h3 class="sd-h">LOCATIONS<span>この回に登場した場所</span></h3>
       <ul class="sd-places">${pls.map(p=>`<li><a href="#spot-${p.id}" data-open="spot-${p.id}">
         <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
@@ -423,8 +437,9 @@ function spotSheet(p){
     <div class="wrap spd-grid">
       <div>
         <div class="panel-top"><span class="panel-no">${p.no}</span><span class="place-cat">${CAT[p.cat].en}<br><span class="cat-ja">${CAT[p.cat].ja}</span></span></div>
-        <h2 class="spd-title" id="sheetTitle">${esc(p.name)}</h2><p class="place-en">${esc(p.nameEn)}</p>
+        <h2 class="spd-title" id="sheetTitle">${esc(p.name)}</h2>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}
         <p class="spd-desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
+        ${PH_NOTE(p.image)}
       </div>
       <div>
         ${factsHTML(p)}
@@ -546,9 +561,7 @@ const dockLinks=[...dock.querySelectorAll('a[href^="#"]')];
 const secIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)dockLinks.forEach(a=>a.toggleAttribute("aria-current",a.getAttribute("href")==="#"+e.target.id))}),{rootMargin:"-45% 0px -50% 0px"});
 ["stories","places","map"].forEach(id=>secIO.observe(document.getElementById(id)));
 
-/* hero: 最新エピソードへのショートカット */
-const hl=document.getElementById("heroLatest");
-if(LATEST){hl.href="#"+LATEST.id;hl.dataset.open=LATEST.id;hl.innerHTML=`<span class="hl-k">LATEST</span><span class="hl-v">EP.${LATEST.no} ${esc(LATEST.title)}</span><i aria-hidden="true">→</i>`}else hl.remove();
+/* 最新エピソードへの導線は STORIES セクションに集約（ファーストビューには置かない） */
 
 /* =========================================================
    REVEAL / INIT

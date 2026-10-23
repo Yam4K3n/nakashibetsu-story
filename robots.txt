@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://woyatsu.github.io/nakashibetsu-story/sitemap.xml
+Sitemap: https://yam4k3n.github.io/nakashibetsu-story/sitemap.xml

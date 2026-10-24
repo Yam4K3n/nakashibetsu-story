@@ -326,7 +326,17 @@ function applyFilter(f){
   document.getElementById("placeEmpty").hidden=layoutPlaces()>0;
   requestAnimationFrame(()=>pg.querySelectorAll(".place:not([hidden]) .frame").forEach(fig=>{const el=fig.closest(".place");el.classList.remove("rv-wait");el.classList.add("rv-in");const w=fig.getBoundingClientRect().width;if(!fig.dataset.done||Math.abs(w-(+fig.dataset.w||0))>w*.12)paintFrame(fig,true)}));
 }
-fl.addEventListener("click",e=>{const b=e.target.closest(".fbtn");if(!b)return;fl.querySelectorAll(".fbtn").forEach(x=>x.setAttribute("aria-pressed",x===b));applyFilter(b.dataset.f)});
+/* 横スクロールの帯で、端が隠れているボタンを押したときは横方向にだけ寄せて全体を見せる
+   （ページの縦位置は動かさない） */
+function revealChip(strip,btn){
+  if(!strip||!btn)return;
+  const s=strip.getBoundingClientRect(),r=btn.getBoundingClientRect(),pad=16;
+  let d=0;
+  if(r.left<s.left+pad)d=r.left-s.left-pad;
+  else if(r.right>s.right-pad)d=r.right-s.right+pad;
+  if(Math.abs(d)>1)strip.scrollTo({left:strip.scrollLeft+d,behavior:reduce?"auto":"smooth"});
+}
+fl.addEventListener("click",e=>{const b=e.target.closest(".fbtn");if(!b)return;revealChip(fl,b);fl.querySelectorAll(".fbtn").forEach(x=>x.setAttribute("aria-pressed",x===b));applyFilter(b.dataset.f)});
 layoutPlaces();
 
 /* =========================================================
@@ -380,6 +390,7 @@ function selectSpot(id){
   const p=PL[id];if(!p)return;
   mapBox.querySelectorAll(".pin").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
   spotIdx.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
+  revealChip(spotIdx,spotIdx.querySelector(`button[data-id="${id}"]`));
   panel.innerHTML=`<figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
   <div class="panel-body"><div class="panel-top"><span class="panel-no">${p.no}</span><span class="place-cat">${CAT[p.cat].en}<br><span class="cat-ja">${CAT[p.cat].ja}</span></span></div>
   <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
@@ -472,6 +483,7 @@ function archiveSheet(){
 }
 sheetBody.addEventListener("click",e=>{
   const b=e.target.closest(".arc-f");if(!b)return;
+  revealChip(b.parentElement,b);
   sheetBody.querySelectorAll(".arc-f").forEach(x=>x.setAttribute("aria-pressed",x===b));
   sheetBody.querySelectorAll(".arc-grid li").forEach(li=>{li.hidden=!(b.dataset.c==="ALL"||li.dataset.c===b.dataset.c)});
   watchFrames(sheetBody);

@@ -209,7 +209,7 @@ section{scroll-margin-top:64px}
 .fbtn{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px 18px 16px;position:relative;color:var(--stone);transition:color .3s}
 .fbtn b{font-family:var(--f-display);font-stretch:118%;font-weight:600;font-size:11.5px;letter-spacing:.24em}
 .fbtn small{font-size:11px;letter-spacing:.12em}
-.fbtn::after{content:"";position:absolute;left:18px;right:18px;bottom:-5px;height:2px;background:var(--ink);transform:scaleX(0);transition:transform .5s var(--ease)}
+.fbtn::after{content:"";position:absolute;left:18px;right:18px;bottom:-4px;height:2px;background:var(--ink);transform:scaleX(0);transition:transform .5s var(--ease)}
 .fbtn[aria-pressed="true"]{color:var(--ink)}
 .fbtn[aria-pressed="true"]::after{transform:scaleX(1)}
 .fbtn:hover{color:var(--ink)}
@@ -519,7 +519,7 @@ html:not(.show-draft) .draft-note{display:none}
 .arc-filters::-webkit-scrollbar{display:none}
 .arc-f{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 16px 14px;color:var(--ash);font-family:var(--f-display);font-stretch:118%;font-weight:600;font-size:11px;letter-spacing:.24em;position:relative;min-height:44px}
 .arc-f small{font-family:var(--f-gothic);font-weight:400;font-size:11px;letter-spacing:.1em}
-.arc-f::after{content:"";position:absolute;left:16px;right:16px;bottom:-5px;height:2px;background:var(--paper);transform:scaleX(0);transition:transform .5s var(--ease)}
+.arc-f::after{content:"";position:absolute;left:16px;right:16px;bottom:-4px;height:2px;background:var(--paper);transform:scaleX(0);transition:transform .5s var(--ease)}
 .arc-f[aria-pressed="true"]{color:var(--paper)}
 .arc-f[aria-pressed="true"]::after{transform:scaleX(1)}
 .arc-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:40px clamp(16px,2vw,28px)}
@@ -595,3 +595,19 @@ html:not(.show-draft) .draft-note{display:none}
 .hero-ph{opacity:.7;font-size:10px}
 .logo-en{white-space:nowrap}
 @media (max-width:1100px){.nav{gap:18px}.nav .sns{padding-left:18px}}
+
+/* =========================================================
+   横スクロールの帯（PLACESカテゴリ／マップのスポット／ALL STORIESカテゴリ）
+   - overflow-y:hidden … 帯の中身が縦に1pxでも動ける状態だと、ブラウザが縦スワイプまで
+     帯に割り当ててしまい、ページが上下に動かず中身がぐらつく。縦方向は動かない領域にする
+   - overscroll-behavior-x:contain … 端まで行ったときの横の引っ張りをページ側
+     （横揺れ・戻る操作）に伝えない。縦方向はページへそのまま伝える
+   - touch-action:manipulation … 縦横どちらのスワイプも通常どおり。ダブルタップ拡大の待ちを
+     なくしてタップを即反応に（ピンチでの拡大はそのまま使える）
+   ========================================================= */
+.filters,.spot-index,.arc-filters{
+  overflow-x:auto;overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  touch-action:manipulation;
+  -webkit-overflow-scrolling:touch;
+}

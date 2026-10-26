@@ -11,8 +11,8 @@
      空欄の間は、シーンごとの仮ビジュアルが自動で表示されます。
    ========================================================= */
 const SITE = {
-  /* 仮の文章・仮の画像に「仮テキスト」「仮画像」ラベルを表示する（本番の内容がそろったら false に） */
-  showDraftLabels: true,
+  /* 制作中の確認用ラベル（「仮テキスト」「仮イメージ」など）を表示するか。公開中は false */
+  showDraftLabels: false,
 
   /* トップページに表示するエピソードの本数（それ以外は「すべてのエピソードを見る」から） */
   homeEpisodes: 4,
@@ -21,8 +21,8 @@ const SITE = {
   links: {
     tiktok: "https://www.tiktok.com/@nakashibetsu_story",
     instagram: "https://www.instagram.com/nakashibetsu_story/",
-    form: "",      // 情報提供フォーム（Googleフォーム等）のURL。空欄の間は「準備中」表示
-    contact: ""    // お問い合わせ先のURL。空欄の間は「準備中」表示（Instagram DMを案内）
+    form: "",      // 情報提供フォーム（Googleフォーム等）のURL。空欄の間はボタン自体を表示しません
+    contact: ""    // お問い合わせ先のURL。空欄の間はフッターの Contact を表示しません
   },
 
   /* ページ固定の写真・映像（パスを入れるだけで差し替わります） */
@@ -48,68 +48,95 @@ const SITE = {
   ],
 
   /* ---------- エピソード（古い順に並べる） ---------- */
+  /* ---------- エピソード（古い順に並べる） ----------
+     copy  : メインコピー（詳細画面とトップのカードに大きく表示。「」は不要）
+     lead  : 紹介文（あらすじ）
+     ※ 紹介文は暫定の掲載案です。ここを書き換えるだけでサイト全体に反映されます。
+     tiktok / instagram : その回の個別投稿URL（空欄の間はアカウントページが開きます）
+  */
   episodes: [
     {
       id: "ep-01", no: "01",
       title: "根室中標津空港", titleEn: "ARRIVAL",
       category: "RETURN", categoryJa: "帰ってくる",
-      lead: "10年ぶりの帰郷。物語は、根室中標津空港から始まる。",
-      draft: true,          // 紹介文が仮の場合は true（「仮テキスト」ラベルが付きます）
+      copy: "物語は、ここから始まる。",
+      lead: "10年ぶりに降り立った故郷。懐かしいはずの場所から、まだ知らない中標津を探す旅が始まる。",
+      draft: false,         // 文章が仮置きの場合は true（「仮テキスト」ラベルが付きます）
       image: "",            // ポスター用の写真（縦長 4:5 推奨）例: "assets/img/episodes/ep-01.jpg"
       scene: "airport",     // 写真が無い間の仮ビジュアル
-      tiktok: "",           // 投稿のURL。空欄ならアカウントページへ
-      instagram: "",
-      published: "",        // 公開日 例: "2026-10-01"
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7691546741308443924",
+      instagram: "https://www.instagram.com/reel/Dd764AyTPXG/",
+      published: "",        // 公開日 例: "2026-10-01"（空欄なら表示しません）
       places: ["airport"]
     },
     {
       id: "ep-02", no: "02",
       title: "ミルクロード", titleEn: "MILK ROAD",
       category: "FIND", categoryJa: "違いを探す",
-      lead: "牧草地のあいだを延びる一本道へ。変わったものと、変わらなかったもの。",
-      draft: true,
-      image: "", scene: "road",
-      tiktok: "", instagram: "", published: "",
+      copy: "この道は、どこまで続くんだろう。",
+      lead: "どこまでもまっすぐに伸びるミルクロード。見慣れたはずの景色が、10年という時間を経て、少し違って見えた。",
+      draft: false,
+      image: "",
+      scene: "road",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7692364849640131860",
+      instagram: "https://www.instagram.com/reel/DeB66Atzu2_/",
+      published: "",
       places: ["milk-road"]
     },
     {
       id: "ep-03", no: "03",
       title: "開陽台", titleEn: "KAIYODAI",
       category: "FIND", categoryJa: "違いを探す",
-      lead: "地平線まで続く景色を、もう一度見に行く。",
-      draft: true,
-      image: "", scene: "panorama",
-      tiktok: "", instagram: "", published: "",
+      copy: "変わらない景色に、変わった自分がいた。",
+      lead: "目の前に広がる開陽台の大パノラマ。あの頃と同じ景色を、今の自分はどう感じるのだろう。",
+      draft: false,
+      image: "",
+      scene: "panorama",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7693161377418038534",
+      instagram: "https://www.instagram.com/reel/DeHOjtKTYFS/",
+      published: "",
       places: ["kaiyodai"]
     },
     {
       id: "ep-04", no: "04",
       title: "ラ・キンコ", titleEn: "",   // titleEn：英語表記（未定なら空欄のままでOK）
       category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
-      lead: "EP.04の舞台は「ラ・キンコ」。",
-      draft: true,
-      image: "", scene: "town",
-      tiktok: "", instagram: "", published: "",
+      copy: "あの味は、まだここにあった。",
+      lead: "故郷で再び訪れたラ・キンコ。懐かしさと新しい発見が交差する、思い出の一皿。",
+      draft: false,
+      image: "",
+      scene: "town",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7694579820864392468",
+      instagram: "https://www.instagram.com/reel/DeRlw7PT_5q/",
+      published: "",
       places: ["la-kinko"]
     },
     {
       id: "ep-05", no: "05",
       title: "夢みるケーキ屋 ポルテ", titleEn: "",   // titleEn：英語表記（未定なら空欄のままでOK）
       category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
-      lead: "EP.05の舞台は「夢みるケーキ屋 ポルテ」。",
-      draft: true,
-      image: "", scene: "cafe",
-      tiktok: "", instagram: "", published: "",
+      copy: "選べない幸せが、ここにある。",
+      lead: "ショーケースに並ぶ、色とりどりのケーキたち。どれにしようか迷う時間さえ楽しい。ポルテで見つけた、小さな幸せ。",
+      draft: false,
+      image: "",
+      scene: "cafe",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7697191292333214996",
+      instagram: "https://www.instagram.com/reel/DejMiCCzt5l/",
+      published: "",
       places: ["porte"]
     },
     {
       id: "ep-06", no: "06",
       title: "らー麺 たら福", titleEn: "",   // titleEn：英語表記（未定なら空欄のままでOK）
       category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
-      lead: "EP.06の舞台は「らー麺 たら福」。",
-      draft: true,
-      image: "", scene: "food",
-      tiktok: "", instagram: "", published: "",
+      copy: "変わらない一杯に、会いに行く。",
+      lead: "故郷で味わう、らー麺 たら福の一杯。湯気の向こうに広がる、また食べたくなる味。",
+      draft: false,
+      image: "",
+      scene: "food",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7698307003323567380",
+      instagram: "https://www.instagram.com/reel/Deq8LDQT4Kw/",
+      published: "",
       places: ["tarafuku"]
     },
     {
@@ -117,10 +144,14 @@ const SITE = {
       title: "GLOW -Amusement Bar-", titleEn: "GLOW -AMUSEMENT BAR-",
       posterTitle: "GLOW",   // ポスターの縦書きタイトル（長い名前を短く見せたいときだけ指定）
       category: "MEET", categoryJa: "人に会う",   // カテゴリは仮（変更可）
-      lead: "EP.07の舞台は「GLOW -Amusement Bar-」。",
-      draft: true,
-      image: "", scene: "shelf",
-      tiktok: "", instagram: "", published: "",
+      copy: "この街の夜は、まだまだ面白い。",
+      lead: "豊富なボードゲームと、気軽に遊べる驚きの価格。GLOWで出会った、中標津の夜の新しい楽しみ方。",
+      draft: false,
+      image: "",
+      scene: "shelf",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7699788500802997525",
+      instagram: "https://www.instagram.com/reel/De1NtArT_mv/",
+      published: "",
       places: ["glow"]
     }
   ],
@@ -129,7 +160,8 @@ const SITE = {
      下の観光情報は「確認できたものだけ」記入してください。null や空欄の項目はサイトに表示されません。
        address  所在地      hours   営業時間（改行は \n）  closed  定休日
        price    料金        access  アクセス              parking 駐車場     phone 電話番号
-       official 公式サイトURL    sns 公式SNSのURL
+       official 公式サイトURL（officialLabel で表示名を変更可）
+       sns 公式SNSのURL（snsLabel で表示名を変更可）   ref 参考にした情報源（表示しません）
        checkedAt 情報を確認した日（例: "2026-11-01"）→「◯◯時点の情報」と表示されます
      mapQuery : Googleマップで検索する語句（施設名など）
      lat, lng : 確認済みの座標。入れるとGoogleマップでピンポイント表示になります
@@ -143,9 +175,14 @@ const SITE = {
       image: "",            // 例: "assets/img/places/airport.jpg"（横長 16:10 推奨）
       desc: "物語のはじまりの場所。主人公が10年ぶりに故郷へ降り立った、空の玄関口。",
       draft: true,          // 説明文が仮の場合は true
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "根室中標津空港", lat: null, lng: null,
+      address: "北海道標津郡中標津町北中16番地9",
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: "https://www.nakashibetsu-airport.jp/",
+      sns: null,
+      ref: null,   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "根室中標津空港 北海道標津郡中標津町北中16番地9",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [44, 72]
     },
     {
@@ -154,9 +191,14 @@ const SITE = {
       cat: "NATURE", scene: "road", image: "",
       desc: "牧草地のあいだを延びる道。EP.02の舞台になりました。",
       draft: true,
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "ミルクロード 中標津", lat: null, lng: null,
+      address: "北海道標津郡中標津町字開陽・町道北19号道路",   // 道路のため番地はありません
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: null,
+      sns: null,
+      ref: "https://kaiyoudai.jp/index.php/sightseeing/spot/milk_road/",   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "中標津 ミルクロード 開陽 北19号道路",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [33, 32]
     },
     {
@@ -165,9 +207,14 @@ const SITE = {
       cat: "NATURE", scene: "panorama", image: "",
       desc: "牧草地と防風林が地平線まで続く景色を見渡せる展望台。",
       draft: true,
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "開陽台", lat: null, lng: null,
+      address: "北海道標津郡中標津町俣落2256番地17",
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: "https://nakashibetsu.jp/kankou/kankou_jouhou/kaiyoudai/", officialLabel: "中標津町 観光情報",
+      sns: null,
+      ref: null,   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "開陽台展望館 北海道中標津町俣落2256-17",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [26, 17]
     },
     {
@@ -176,9 +223,14 @@ const SITE = {
       cat: "FOOD", scene: "town", image: "",
       desc: "EP.04の舞台になったお店。",
       draft: true,
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "ラ・キンコ 中標津", lat: null, lng: null,
+      address: "北海道標津郡中標津町西3条北2丁目1",
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: null,
+      sns: "https://www.instagram.com/la_kinko__/", snsLabel: "Instagram",
+      ref: "https://kaiyoudai.jp/index.php/restaurant/gourmet-la-kinko/",   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "ラ・キンコ 中標津 西3条北2丁目1",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [44, 45]
     },
     {
@@ -187,9 +239,14 @@ const SITE = {
       cat: "FOOD", scene: "cafe", image: "",
       desc: "EP.05の舞台になったお店。",
       draft: true,
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "夢みるケーキ屋 ポルテ 中標津", lat: null, lng: null,
+      address: "北海道標津郡中標津町大通南2丁目1-1",
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: "https://www.portecake.com/",
+      sns: null,
+      ref: null,   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "夢みるケーキ屋 ポルテ 中標津 大通南2丁目1-1",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [60, 42]
     },
     {
@@ -198,9 +255,14 @@ const SITE = {
       cat: "FOOD", scene: "food", image: "",
       desc: "EP.06の舞台になったお店。",
       draft: true,
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "らー麺 たら福 中標津", lat: null, lng: null,
+      address: "北海道標津郡中標津町西7条南1丁目",   // 番地は未確認（推測で補完しない）
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: null,
+      sns: null,
+      ref: "https://nakashibetsu-inshokugyo.com/navigation_meshi/",   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "らー麺 たら福 中標津 西7条南1丁目",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [54, 57]
     },
     {
@@ -209,9 +271,14 @@ const SITE = {
       cat: "FOOD", scene: "shelf", image: "",
       desc: "EP.07の舞台になったお店。",
       draft: true,
-      address: null, hours: null, closed: null, price: null,
-      access: null, parking: null, phone: null, official: null, sns: null, checkedAt: null,
-      mapQuery: "GLOW -Amusement Bar- 中標津", lat: null, lng: null,
+      address: "北海道標津郡中標津町大通北2丁目1番地 MYビル1階中央",   // MYビルの表記は公開前に店舗へ最終確認を推奨
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: null,
+      sns: null,
+      ref: "https://bodoge.hoobby.net/spaces/glow/access",   // 参考にした情報源（サイトには表示しません）
+      checkedAt: null,
+      mapQuery: "GLOW Amusement Bar 中標津 大通北2丁目1 MYビル",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [67, 55]
     }
   ]

@@ -120,10 +120,20 @@ a{color:var(--moss)}
   const ids = SITE.episodes.map(e => e.id), nos = SITE.episodes.map(e => e.no);
   add(new Set(ids).size === ids.length ? "ok" : "ng", "エピソードIDの重複なし", ids.join(" / "));
   add(new Set(nos).size === nos.length ? "ok" : "ng", "話数（no）の重複なし", nos.map(n => "EP." + n).join(" / "));
+  const ttIds = SITE.episodes.map(e => (String(e.tiktok || "").match(/\/video\/(\d+)/) || [])[1]).filter(Boolean);
+  const igIds = SITE.episodes.map(e => (String(e.instagram || "").match(/\/(?:reel|p)\/([\w-]+)/) || [])[1]).filter(Boolean);
+  add(new Set(ttIds).size === ttIds.length ? "ok" : "ng", "TikTok投稿URLの重複なし（取り違え防止）", `${ttIds.length}件`);
+  add(new Set(igIds).size === igIds.length ? "ok" : "ng", "Instagram投稿URLの重複なし（取り違え防止）", `${igIds.length}件`);
+  // TikTokの動画番号は投稿日時の順に大きくなるため、話数順に並んでいるかで取り違えを検出
+  const ordered = ttIds.every((id, i) => i === 0 || BigInt(id) > BigInt(ttIds[i - 1]));
+  add(ordered ? "ok" : "warn", "TikTok投稿の順番が話数順", ordered ? "EP.01から順に新しい投稿になっています" : "話数と投稿順が一致しません。URLの取り違えがないか確認してください");
   for (const e of SITE.episodes) {
     const miss = [];
     if (!e.tiktok) miss.push("TikTok投稿URL");
+    else if (!/^https:\/\/www\.tiktok\.com\/@nakashibetsu_story\/video\/\d+/.test(e.tiktok)) add("ng", `EP.${e.no} TikTok URLの形式`, `<code>${esc(e.tiktok)}</code>`);
     if (!e.instagram) miss.push("Instagram投稿URL");
+    else if (!/^https:\/\/www\.instagram\.com\/(reel|p)\/[\w-]+\/?$/.test(e.instagram)) add("ng", `EP.${e.no} Instagram URLの形式`, `<code>${esc(e.instagram)}</code>`);
+    if (!e.copy) miss.push("メインコピー（copy）");
     if (!e.published) miss.push("公開日");
     if (e.draft) miss.push("紹介文が仮（draft: true）");
     const badPlace = (e.places || []).filter(id => !SITE.places.some(p => p.id === id));
@@ -147,9 +157,9 @@ a{color:var(--moss)}
   sec("6. リンクと表示設定");
   add(SITE.links.tiktok ? "ok" : "ng", "TikTok アカウント", `<code>${esc(SITE.links.tiktok)}</code>`);
   add(SITE.links.instagram ? "ok" : "ng", "Instagram アカウント", `<code>${esc(SITE.links.instagram)}</code>`);
-  add(SITE.links.form ? "ok" : "warn", "情報提供フォーム", SITE.links.form ? `<code>${esc(SITE.links.form)}</code>` : "未設定（サイトでは「準備中」と表示されます）");
-  add(SITE.links.contact ? "ok" : "warn", "お問い合わせ先", SITE.links.contact ? `<code>${esc(SITE.links.contact)}</code>` : "未設定（サイトでは「準備中」と表示されます）");
-  add(SITE.showDraftLabels ? "warn" : "ok", "「仮テキスト」「仮画像」ラベル", SITE.showDraftLabels ? "表示中です。本番の文章・写真がそろったら data.js の <code>showDraftLabels</code> を <code>false</code> にしてください。" : "非表示");
+  add(SITE.links.form ? "ok" : "warn", "情報提供フォーム", SITE.links.form ? `<code>${esc(SITE.links.form)}</code>` : "未設定（サイトではボタンを表示しません）");
+  add(SITE.links.contact ? "ok" : "warn", "お問い合わせ先", SITE.links.contact ? `<code>${esc(SITE.links.contact)}</code>` : "未設定（サイトではボタンを表示しません）");
+  add(SITE.showDraftLabels ? "ng" : "ok", "制作中ラベル（仮テキスト・仮イメージなど）", SITE.showDraftLabels ? "表示中です。公開中は data.js の <code>showDraftLabels</code> を <code>false</code> にしてください。" : "非表示（公開用の設定）");
 
   /* ---------- render ---------- */
   const icon = { ok:"✓", warn:"!", ng:"×", info:"i" };

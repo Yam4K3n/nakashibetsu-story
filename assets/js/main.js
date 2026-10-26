@@ -275,8 +275,7 @@ function gmapsURL(p){
 const pending = txt => `<span class="muted">${txt||"確認中"}</span>`;
 const DRAFT = cond => SITE.showDraftLabels && cond ? '<span class="draft">仮テキスト</span>' : "";
 const PH = img => SITE.showDraftLabels && !img ? '<span class="p-ph">仮イメージ</span>' : "";
-// 写真がまだ無いときの注意書き（仮ビジュアルを実際の店舗・風景と誤解されないように）
-const PH_NOTE = img => !img ? '<p class="ph-note">※ 写真は撮影準備中のため、仮のイメージを表示しています。実際の店舗・風景とは異なります。</p>' : "";
+// 演出用ビジュアルである旨はフッターに一括表記（各画面には制作途中の表示を出さない）
 document.documentElement.classList.toggle("show-draft", !!SITE.showDraftLabels);
 // ポスターに縦書きで載せるタイトル（長い名前は posterTitle で短くできます）
 function posterTitle(ep){
@@ -296,7 +295,7 @@ function storyCard(ep){
       ${posterTitle(ep)}<span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no}${ep.titleEn?` — ${esc(ep.titleEn)}`:""}</span></div>
     </figure>
     <div class="story-meta"><p class="story-cat"><span>${esc(ep.category)}</span>${esc(ep.categoryJa)}</p>
-      <h3 class="story-title"><span class="sr">EP.${ep.no} </span>${esc(ep.title)}</h3><p class="story-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
+      <h3 class="story-title"><span class="sr">EP.${ep.no} </span>${esc(ep.title)}</h3>${COPY(ep,"story-copy")}<p class="story-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
       ${pls.length?`<p class="story-places">登場スポット：${pls.map(p=>esc(p.name)).join("、")}</p>`:""}
       <span class="story-more">エピソードを見る<i aria-hidden="true">→</i></span></div></a></article>`;
 }
@@ -365,25 +364,29 @@ spotIdx.innerHTML=SITE.places.map(p=>`<button data-id="${p.id}" aria-pressed="fa
 const FACT_FIELDS=[["address","所在地"],["hours","営業時間"],["closed","定休日"],["price","料金"],["access","アクセス"],["parking","駐車場"],["phone","電話"]];
 function factsHTML(p){
   const eps=PLACE_EPS[p.id];
-  const rows=FACT_FIELDS.filter(([k])=>p[k]).map(([k,l])=>`<dt>${l}</dt><dd>${k==="phone"?`<a href="tel:${esc(String(p[k]).replace(/[^0-9+]/g,""))}">${esc(p[k])}</a>`:esc(p[k]).replace(/\n/g,"<br>")}</dd>`);
+  const rows=FACT_FIELDS.filter(([k])=>p[k]).map(([k,l])=>{
+    if(k==="address"){
+      // 所在地のすぐ下に、Googleマップの検索リンクを置く
+      const u=gmapsURL(p);
+      return `<dt>${l}</dt><dd class="addr"><span class="addr-text">${esc(p.address)}</span>${u?`<a class="addr-map" href="${u}" target="_blank" rel="noopener">Googleマップで開く ↗</a>`:""}</dd>`;
+    }
+    return `<dt>${l}</dt><dd>${k==="phone"?`<a href="tel:${esc(String(p[k]).replace(/[^0-9+]/g,""))}">${esc(p[k])}</a>`:esc(p[k]).replace(/\n/g,"<br>")}</dd>`;
+  });
   const links=[];
-  if(p.official)links.push(`<a href="${esc(p.official)}" target="_blank" rel="noopener">公式サイト ↗</a>`);
-  if(p.sns)links.push(`<a href="${esc(p.sns)}" target="_blank" rel="noopener">公式SNS ↗</a>`);
+  if(p.official)links.push(`<a href="${esc(p.official)}" target="_blank" rel="noopener">${esc(p.officialLabel||"公式サイト")} ↗</a>`);
+  if(p.sns)links.push(`<a href="${esc(p.sns)}" target="_blank" rel="noopener">${esc(p.snsLabel||"公式SNS")} ↗</a>`);
   if(links.length)rows.push(`<dt>公式</dt><dd class="facts-links">${links.join("")}</dd>`);
-  const verified=rows.length>0;
   if(eps.length){
     // 登場回が多いスポットでも長くならないよう、新しい3話まで表示
     const recent=[...eps].reverse().slice(0,3), more=eps.length-recent.length;
     rows.push(`<dt>登場</dt><dd>${recent.map(e=>`<a href="#${e.id}" data-open="${e.id}">EP.${e.no}「${esc(e.title)}」</a>`).join("<br>")}${more>0?`<br><span class="muted">ほか${more}話</span>`:""}</dd>`);
   }
-  const note=verified
-    ?(p.checkedAt?`<p class="facts-note">掲載情報は${fmtDate(p.checkedAt)}時点のものです。訪問前に公式情報もご確認ください。</p>`:"")
-    :`<p class="facts-note">営業時間などの詳しい情報は、確認でき次第掲載します。</p>`;
+  const note=p.checkedAt?`<p class="facts-note">掲載情報は${fmtDate(p.checkedAt)}時点のものです。訪問前に公式情報もご確認ください。</p>`:"";
   return (rows.length?`<dl class="facts">${rows.join("")}</dl>`:"")+note;
 }
 function gmapsBtn(p,cls="btn solid"){
   const u=gmapsURL(p);
-  if(!u) return `<span class="${cls}" aria-disabled="true">Googleマップ（準備中）</span>`;
+  if(!u) return "";
   return `<a class="${cls}" href="${u}" target="_blank" rel="noopener">Googleマップで開く ↗</a>`;
 }
 function selectSpot(id){
@@ -396,7 +399,7 @@ function selectSpot(id){
   <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
   ${factsHTML(p)}
   <div class="panel-actions">${gmapsBtn(p)}<a class="btn" href="#spot-${p.id}" data-open="spot-${p.id}">詳しく見る →</a></div>
-  ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは「'+esc(p.mapQuery)+'」の検索結果が開きます。</p>':""}</div>`;
+  ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは、施設名と所在地で検索した結果が開きます。</p>':""}</div>`;
   paintFrame(panel.querySelector(".frame"),true);
 }
 mapBox.addEventListener("click",e=>{const b=e.target.closest(".pin");if(b)selectSpot(b.dataset.id)});
@@ -409,12 +412,16 @@ spotIdx.addEventListener("click",e=>{const b=e.target.closest("button");if(b)sel
 const sheet=document.getElementById("sheet"),sheetBody=document.getElementById("sheetBody"),sheetKind=document.getElementById("sheetKind");
 const baseTitle=document.title;let lastFocus=null;
 
+/* メインコピー（「」付きで表示。copy が空なら何も出さない） */
+// 読点「、」とスペースの後ろでだけ改行させる（言葉の途中で折り返さないように）
+function phrase(t){ return esc(t).replace(/([、，,])/g, "$1<wbr>").replace(/ /g, " <wbr>"); }
+function COPY(ep,cls){ return ep.copy ? `<p class="${cls}">「${phrase(ep.copy)}」</p>` : ""; }
 function watchBtns(ep){
   const tt=ep.tiktok||SITE.links.tiktok, ig=ep.instagram||SITE.links.instagram;
   return `<div class="watch">
-    <a class="btn-light" href="${esc(tt)}" target="_blank" rel="noopener">TikTokで観る<i aria-hidden="true">↗</i></a>
-    <a class="btn-ghost" href="${esc(ig)}" target="_blank" rel="noopener">Instagramで観る<i aria-hidden="true">↗</i></a></div>
-    ${ep.tiktok||ep.instagram?"":'<p class="watch-note">投稿ページへのリンクは準備中のため、アカウントページが開きます。</p>'}`;
+    <a class="btn-light" href="${esc(tt)}" target="_blank" rel="noopener" aria-label="EP.${ep.no} ${esc(ep.title)} をTikTokで見る（新しいタブで開きます）">TikTokで動画を見る<i aria-hidden="true">↗</i></a>
+    <a class="btn-ghost" href="${esc(ig)}" target="_blank" rel="noopener" aria-label="EP.${ep.no} ${esc(ep.title)} をInstagramで見る（新しいタブで開きます）">Instagramで動画を見る<i aria-hidden="true">↗</i></a></div>
+`;
 }
 function storySheet(ep){
   const i=SITE.episodes.indexOf(ep), prev=SITE.episodes[i-1], next=SITE.episodes[i+1];
@@ -427,9 +434,9 @@ function storySheet(ep){
       <p class="story-cat"><span>${esc(ep.category)}</span>${esc(ep.categoryJa)}${ep.published?`<em>${fmtDate(ep.published)}</em>`:""}</p>
       <h2 class="sd-title" id="sheetTitle"><span class="sd-no">EP.${ep.no}</span>${esc(ep.title)}</h2>
       ${ep.titleEn?`<p class="sd-en">${esc(ep.titleEn)}</p>`:""}
+      ${COPY(ep,"sd-copy")}
       <p class="sd-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
       ${watchBtns(ep)}
-      ${PH_NOTE(ep.image)}
       ${pls.length?`<h3 class="sd-h">LOCATIONS<span>この回に登場した場所</span></h3>
       <ul class="sd-places">${pls.map(p=>`<li><a href="#spot-${p.id}" data-open="spot-${p.id}">
         <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
@@ -437,7 +444,7 @@ function storySheet(ep){
       <a class="sd-all" href="#episodes" data-open="episodes">すべてのエピソード<span>全${SITE.episodes.length}話</span><i aria-hidden="true">→</i></a>
       <nav class="sd-nav" aria-label="ほかのエピソード">
         ${prev?`<a href="#${prev.id}" data-open="${prev.id}"><small>← PREV</small>EP.${prev.no} ${esc(prev.title)}</a>`:"<span></span>"}
-        ${next?`<a class="r" href="#${next.id}" data-open="${next.id}"><small>NEXT →</small>EP.${next.no} ${esc(next.title)}</a>`:`<span class="r sd-soon"><small>NEXT</small>次のエピソードは準備中</span>`}
+        ${next?`<a class="r" href="#${next.id}" data-open="${next.id}"><small>NEXT →</small>EP.${next.no} ${esc(next.title)}</a>`:`<span class="r sd-soon"><small>NEXT</small>次回をお楽しみに</span>`}
       </nav>
     </div></article>`;
 }
@@ -450,12 +457,11 @@ function spotSheet(p){
         <div class="panel-top"><span class="panel-no">${p.no}</span><span class="place-cat">${CAT[p.cat].en}<br><span class="cat-ja">${CAT[p.cat].ja}</span></span></div>
         <h2 class="spd-title" id="sheetTitle">${esc(p.name)}</h2>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}
         <p class="spd-desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
-        ${PH_NOTE(p.image)}
       </div>
       <div>
         ${factsHTML(p)}
         <div class="panel-actions">${gmapsBtn(p)}<a class="btn" href="#map" data-locate="${p.id}">概略図で見る</a></div>
-        ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは「'+esc(p.mapQuery)+'」の検索結果が開きます。訪問前に最新の情報をご確認ください。</p>':""}
+        ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは、施設名と所在地で検索した結果が開きます。訪問前に最新の情報をご確認ください。</p>':""}
       </div>
     </div>
     ${eps.length?`<div class="wrap"><h3 class="sd-h">EPISODES<span>この場所が登場するエピソード</span></h3>
@@ -478,7 +484,7 @@ function archiveSheet(){
       <figure class="frame poster" data-scene="${e.scene}" data-seed="${e.id}" data-src="${esc(e.image)}" data-alt="${esc(e.title)}">
         <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${e.no}</span><span class="p-tags">${e===LATEST?'<span class="p-badge">LATEST</span>':""}${PH(e.image)}</span></div>
       </figure>
-      <span class="arc-meta"><small>${esc(e.category)}　${esc(e.categoryJa)}</small><strong><span class="sr">EP.${e.no} </span>${esc(e.title)}</strong>${e.published?`<small class="arc-date">${fmtDate(e.published)}</small>`:""}</span></a></li>`).join("")}</ol>
+      <span class="arc-meta"><small>${esc(e.category)}　${esc(e.categoryJa)}</small><strong><span class="sr">EP.${e.no} </span>${esc(e.title)}</strong>${COPY(e,"arc-copy")}${e.published?`<small class="arc-date">${fmtDate(e.published)}</small>`:""}</span></a></li>`).join("")}</ol>
   </section>`;
 }
 sheetBody.addEventListener("click",e=>{
@@ -530,10 +536,9 @@ sheet.addEventListener("keydown",e=>{
    ========================================================= */
 document.querySelectorAll("[data-sns]").forEach(a=>{const u=SITE.links[a.dataset.sns];if(u)a.href=u});
 const formBtn=document.getElementById("formBtn"),contactLink=document.getElementById("contactLink");
-if(SITE.links.form){formBtn.href=SITE.links.form;formBtn.target="_blank";formBtn.rel="noopener";formBtn.innerHTML=`${formBtn.dataset.readyLabel}<i aria-hidden="true">↗</i>`}
-else{formBtn.setAttribute("aria-disabled","true");formBtn.dataset.soon="情報提供フォームは準備中です。InstagramのDMやTikTokのコメントで受け付けています。"}
-if(SITE.links.contact){contactLink.href=SITE.links.contact;contactLink.target="_blank";contactLink.rel="noopener";contactLink.textContent="Contact ↗"}
-else contactLink.dataset.soon="お問い合わせ窓口は準備中です。InstagramのDMからご連絡ください。";
+// 情報提供フォーム・お問い合わせは、URLを設定したときだけ表示（未設定のボタンは出さない）
+if(SITE.links.form){formBtn.href=SITE.links.form;formBtn.target="_blank";formBtn.rel="noopener";formBtn.hidden=false}
+if(SITE.links.contact){contactLink.href=SITE.links.contact;contactLink.target="_blank";contactLink.rel="noopener";document.getElementById("contactItem").hidden=false}
 
 const toast=document.getElementById("toast");let tt;
 function say(m){toast.textContent=m;toast.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove("show"),3200)}

@@ -243,15 +243,107 @@ function paintFrame(fig,force){
   }
   const src=m.src||m.poster;
   if(src){
-    if(!fig.querySelector("img")){
-      const im=new Image();im.alt=m.alt||"";im.decoding="async";
+    let im=fig.querySelector("img:not(.bd)");
+    if(!im){
+      im=new Image();im.alt=m.alt||"";im.decoding="async";
       im.loading=fig.hasAttribute("data-eager")?"eager":"lazy";
-      im.addEventListener("error",()=>{im.remove();paintCanvas(fig)},{once:true});
+      im.addEventListener("error",()=>{im.remove();fig.classList.remove("has-photo","fit-contain");const bd=fig.querySelector("img.bd");if(bd)bd.remove();paintCanvas(fig)},{once:true});
+      im.addEventListener("load",()=>{fig.classList.add("has-photo");fitImage(fig);fitRO&&fitRO.observe(fig)},{once:true});
       im.src=src;fig.prepend(im);
-    }
-    fig.dataset.done=1;return;
+    }else if(im.complete&&im.naturalWidth){fitImage(fig)}
+    fig.dataset.done=1;fig.dataset.w=fig.getBoundingClientRect().width;return;
   }
   paintCanvas(fig);
+}
+/* =========================================================
+   写真のトリミング
+   data-keep="左,上,右,下"（0〜1）＝ 看板や文字など、欠けてはいけない範囲。
+   ・表示枠の縦横比に合わせて、その範囲が必ず入る位置で切り抜く
+   ・ポスターでは、エピソード番号・タイトルの文字と重なりにくい位置を選ぶ
+   ・どう切っても範囲が入らない横長の枠では、写真全体を収め、余白に同じ写真をぼかして敷く
+   ========================================================= */
+// 枠の大きさが変わったら（スクロールバーの出現・画面の回転など）写真の位置を計算し直す
+const fitRO=window.ResizeObserver?new ResizeObserver(es=>es.forEach(e=>fitImage(e.target))):null;
+function fitImage(fig){
+  const im=fig.querySelector("img:not(.bd)");
+  if(!im||!im.naturalWidth)return;
+  const W=fig.clientWidth,H=fig.clientHeight;if(!W||!H)return;
+  const k=(fig.dataset.keep||"").split(",").map(Number);
+  const box=k.length===4&&k.every(v=>!isNaN(v))?k:null;
+  const a=im.naturalWidth/im.naturalHeight,A=W/H;
+  const vert=A>a;                       // true＝上下を切る／false＝左右を切る
+  const vis=vert?a/A:A/a;               // 表示される割合（0〜1）
+  let contain=false,pos=50;
+  if(box){
+    const lo=vert?box[1]:box[0],hi=vert?box[3]:box[2];
+    if(hi-lo>vis+0.0005){contain=true}   // 範囲が1pxでも欠けるなら全体を収める
+    else if(vis<0.999){
+      // 範囲が入る開始位置の候補から、文字と重なる面積が最も小さい位置を選ぶ（同じなら中央寄り）
+      const minS=Math.max(0,hi-vis),maxS=Math.min(1-vis,lo);
+      const center=Math.min(Math.max((lo+hi)/2-vis/2,minS),maxS);
+      const ovs=fig.querySelector(".poster-ui")?[...fig.querySelectorAll(".p-ep,.p-tags>*,.p-title,.p-credit")].map(e=>e.getBoundingClientRect()).filter(r=>r.width&&r.height):[];
+      const fr=fig.getBoundingClientRect();
+      let best=center,bestCost=Infinity;
+      for(let i=0;i<=24;i++){
+        const s=minS+(maxS-minS)*i/24;
+        let cost=0;
+        if(ovs.length){
+          // 写真の範囲（keep）を画面上の座標に変換
+          const bx0=vert?box[0]*W:(box[0]-s)/vis*W, bx1=vert?box[2]*W:(box[2]-s)/vis*W;
+          const by0=vert?(box[1]-s)/vis*H:box[1]*H, by1=vert?(box[3]-s)/vis*H:box[3]*H;
+          for(const r of ovs){
+            const ox=Math.max(0,Math.min(bx1,r.right-fr.left)-Math.max(bx0,r.left-fr.left));
+            const oy=Math.max(0,Math.min(by1,r.bottom-fr.top)-Math.max(by0,r.top-fr.top));
+            cost+=ox*oy;
+          }
+        }
+        cost+=Math.abs(s-center)*W*H*0.02;   // 中央から離れすぎない
+        if(cost<bestCost-0.5){bestCost=cost;best=s}
+      }
+      pos=maxS>minS||vis<1?(best/(1-vis))*100:50;
+      if(!isFinite(pos))pos=50;
+    }
+  }
+  // ポスター：文字と看板が重なる場合は、文字を避けた範囲に看板が収まるよう写真を少し縮めて配置
+  let safe=null;
+  if(box&&fig.querySelector(".poster-ui")){
+    const fr=fig.getBoundingClientRect();
+    const rel=e=>{const q=e&&e.getBoundingClientRect();return q&&q.width?{l:q.left-fr.left,t:q.top-fr.top,r:q.right-fr.left,b:q.bottom-fr.top}:null};
+    const ep=rel(fig.querySelector(".p-ep")),ti=rel(fig.querySelector(".p-title")),cr=rel(fig.querySelector(".p-credit")),tg=rel(fig.querySelector(".p-tags"));
+    const S={l:W*0.03,t:ep?ep.b+H*0.02:H*0.04,r:ti?ti.l-W*0.025:(tg?Math.min(W*0.97,tg.l+W):W*0.97),b:cr?cr.t-H*0.02:H*0.96};
+    // 現在の配置（cover／contain）での重なりを計算
+    const scl=contain?Math.min(W/im.naturalWidth,H/im.naturalHeight):Math.max(W/im.naturalWidth,H/im.naturalHeight);
+    const dw=im.naturalWidth*scl,dh=im.naturalHeight*scl;
+    const ox=contain?(W-dw)/2:(vert?0:(W-dw)*pos/100), oy=contain?(H-dh)/2:(vert?(H-dh)*pos/100:0);
+    const kb={l:ox+box[0]*dw,t:oy+box[1]*dh,r:ox+box[2]*dw,b:oy+box[3]*dh};
+    const ovr=[ep,ti,cr,tg].filter(Boolean).reduce((s,q)=>s+Math.max(0,Math.min(kb.r,q.r)-Math.max(kb.l,q.l))*Math.max(0,Math.min(kb.b,q.b)-Math.max(kb.t,q.t)),0);
+    const area=(kb.r-kb.l)*(kb.b-kb.t);
+    if(ovr/area>0.02&&S.r-S.l>W*0.4&&S.b-S.t>H*0.4){
+      const kw=(box[2]-box[0])*im.naturalWidth,kh=(box[3]-box[1])*im.naturalHeight;
+      const cover=Math.max(W/im.naturalWidth,H/im.naturalHeight);
+      const sc=Math.min(cover,(S.r-S.l)/kw,(S.b-S.t)/kh);
+      const w2=im.naturalWidth*sc,h2=im.naturalHeight*sc;
+      let left=(S.l+S.r)/2-(box[0]+box[2])/2*w2, top=(S.t+S.b)/2-(box[1]+box[3])/2*h2;
+      // 余白ができないよう枠いっぱいに寄せる。ただし寄せた結果、看板が文字側に戻ってしまう場合は寄せない
+      const inS=(l,t)=>l+box[0]*w2>=S.l-1&&l+box[2]*w2<=S.r+1&&t+box[1]*h2>=S.t-1&&t+box[3]*h2<=S.b+1;
+      if(w2>=W){const c=Math.min(0,Math.max(W-w2,left));if(inS(c,top))left=c}
+      if(h2>=H){const c=Math.min(0,Math.max(H-h2,top));if(inS(left,c))top=c}
+      const gap=left>0.5||top>0.5||left+w2<W-0.5||top+h2<H-0.5;
+      safe={left,top,w:w2,h:h2,need:gap};
+    }
+  }
+  const useBd=contain||(safe&&safe.need);
+  fig.classList.toggle("fit-contain",!!useBd);
+  if(safe){
+    Object.assign(im.style,{objectFit:"fill",objectPosition:"",left:safe.left.toFixed(1)+"px",top:safe.top.toFixed(1)+"px",width:safe.w.toFixed(1)+"px",height:safe.h.toFixed(1)+"px",right:"auto",bottom:"auto"});
+  }else{
+    Object.assign(im.style,{left:"",top:"",width:"",height:"",right:"",bottom:""});
+    im.style.objectFit=contain?"contain":"cover";
+    im.style.objectPosition=contain?"50% 50%":(vert?`50% ${pos.toFixed(1)}%`:`${pos.toFixed(1)}% 50%`);
+  }
+  let bd=fig.querySelector("img.bd");
+  if(useBd&&!bd){bd=new Image();bd.className="bd";bd.alt="";bd.setAttribute("aria-hidden","true");bd.decoding="async";bd.src=im.currentSrc||im.src;fig.prepend(bd)}
+  if(!useBd&&bd)bd.remove();
 }
 /* 一時停止：画面外の動画は止める（モバイルの電池・通信量対策） */
 const vidIO=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(!v)return;e.isIntersecting?v.play().catch(()=>{}):v.pause()}));
@@ -282,6 +374,9 @@ function posterTitle(ep){
   const t=ep.posterTitle||ep.title, latin=/^[\x20-\x7E]+$/.test(t);
   return `<span class="p-title${latin?" latin":""}" style="--len:${[...t].length}">${esc(t)}</span>`;
 }
+// スポット紹介文の段落（data.js の desc を \n で区切る）
+function firstPara(t){ return String(t||"").split("\n")[0]; }
+function paras(t){ return String(t||"").split("\n").filter(Boolean).map(x=>`<p>${esc(x)}</p>`).join(""); }
 function fmtDate(d){ if(!d) return ""; const [y,m,dd]=d.split("-"); return `${y}.${m}.${dd}`; }
 
 /* =========================================================
@@ -290,7 +385,7 @@ function fmtDate(d){ if(!d) return ""; const [y,m,dd]=d.split("-"); return `${y}
 function storyCard(ep){
   const pls=(ep.places||[]).map(id=>PL[id]).filter(Boolean);
   return `<article class="story rv"><a class="story-link" href="#${ep.id}" data-open="${ep.id}">
-    <figure class="frame poster" data-scene="${ep.scene}" data-seed="${ep.id}" data-src="${esc(ep.image)}" data-alt="${esc(ep.title)}">
+    <figure class="frame poster" data-scene="${ep.scene}" data-seed="${ep.id}" data-src="${esc(ep.image)}" data-alt="${esc(ep.imageAlt||ep.title)}" data-keep="${esc((ep.imageKeep||[]).join(","))}">
       <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${ep.no}</span><span class="p-tags">${ep===LATEST?'<span class="p-badge">LATEST</span>':""}${PH(ep.image)}</span>
       ${posterTitle(ep)}<span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no}${ep.titleEn?` — ${esc(ep.titleEn)}`:""}</span></div>
     </figure>
@@ -312,9 +407,9 @@ const catCount=id=>id==="ALL"?SITE.places.length:SITE.places.filter(p=>p.cat===i
 pg.innerHTML=SITE.places.map(p=>{
   const eps=PLACE_EPS[p.id];
   return `<article class="place rv" data-cat="${p.cat}"><a href="#spot-${p.id}" data-open="spot-${p.id}">
-  <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
+  <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.imageAlt||p.name)}" data-keep="${esc((p.imageKeep||[]).join(","))}"></figure>
   <div class="place-meta"><span class="place-no" aria-label="スポット番号">${p.no}</span><span class="place-cat">${CAT[p.cat].en} <span class="cat-ja">／${CAT[p.cat].ja}</span></span>
-  <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="place-desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
+  <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="place-desc">${esc(firstPara(p.desc))}${DRAFT(p.draft)}</p>
   ${eps.length?`<p class="place-ep">${eps.map(e=>`EP.${e.no}「${esc(e.title)}」`).join(" / ")}に登場</p>`:""}</div></a></article>`}).join("")
   +`<p class="place-empty" id="placeEmpty" hidden>このカテゴリのスポットは、取材をしたあとに追加していきます。<br>おすすめの場所があれば、<a href="#join">情報募集</a>から教えてください。</p>`;
 fl.innerHTML=SITE.categories.map((c,i)=>`<button class="fbtn" data-f="${c.id}" aria-pressed="${i===0}"><b>${c.en}<sup>${catCount(c.id)}</sup></b><small>${c.ja}</small></button>`).join("");
@@ -394,9 +489,9 @@ function selectSpot(id){
   mapBox.querySelectorAll(".pin").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
   spotIdx.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
   revealChip(spotIdx,spotIdx.querySelector(`button[data-id="${id}"]`));
-  panel.innerHTML=`<figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
+  panel.innerHTML=`<figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.imageAlt||p.name)}" data-keep="${esc((p.imageKeep||[]).join(","))}"></figure>
   <div class="panel-body"><div class="panel-top"><span class="panel-no">${p.no}</span><span class="place-cat">${CAT[p.cat].en}<br><span class="cat-ja">${CAT[p.cat].ja}</span></span></div>
-  <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
+  <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="desc">${esc(firstPara(p.desc))}${DRAFT(p.draft)}</p>
   ${factsHTML(p)}
   <div class="panel-actions">${gmapsBtn(p)}<a class="btn" href="#spot-${p.id}" data-open="spot-${p.id}">詳しく見る →</a></div>
   ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは、施設名と所在地で検索した結果が開きます。</p>':""}</div>`;
@@ -427,7 +522,7 @@ function storySheet(ep){
   const i=SITE.episodes.indexOf(ep), prev=SITE.episodes[i-1], next=SITE.episodes[i+1];
   const pls=(ep.places||[]).map(id=>PL[id]).filter(Boolean);
   return `<article class="sd wrap">
-    <figure class="frame poster sd-poster" data-scene="${ep.scene}" data-seed="${ep.id}" data-src="${esc(ep.image)}" data-alt="${esc(ep.title)}">
+    <figure class="frame poster sd-poster" data-scene="${ep.scene}" data-seed="${ep.id}" data-src="${esc(ep.image)}" data-alt="${esc(ep.imageAlt||ep.title)}" data-keep="${esc((ep.imageKeep||[]).join(","))}">
       <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${ep.no}</span><span class="p-tags">${PH(ep.image)}</span>${posterTitle(ep)}<span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no}${ep.titleEn?` — ${esc(ep.titleEn)}`:""}</span></div>
     </figure>
     <div class="sd-text">
@@ -439,7 +534,7 @@ function storySheet(ep){
       ${watchBtns(ep)}
       ${pls.length?`<h3 class="sd-h">LOCATIONS<span>この回に登場した場所</span></h3>
       <ul class="sd-places">${pls.map(p=>`<li><a href="#spot-${p.id}" data-open="spot-${p.id}">
-        <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
+        <figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.imageAlt||p.name)}" data-keep="${esc((p.imageKeep||[]).join(","))}"></figure>
         <span><b>${p.no}</b><strong>${esc(p.name)}</strong><small>${CAT[p.cat].en}</small></span><i aria-hidden="true">→</i></a></li>`).join("")}</ul>`:""}
       <a class="sd-all" href="#episodes" data-open="episodes">すべてのエピソード<span>全${SITE.episodes.length}話</span><i aria-hidden="true">→</i></a>
       <nav class="sd-nav" aria-label="ほかのエピソード">
@@ -451,12 +546,12 @@ function storySheet(ep){
 function spotSheet(p){
   const eps=PLACE_EPS[p.id];
   return `<article class="spd">
-    <figure class="frame spd-hero" data-scene="${p.scene}" data-seed="pl-${p.id}-wide" data-src="${esc(p.image)}" data-alt="${esc(p.name)}"></figure>
+    <figure class="frame spd-hero" data-scene="${p.scene}" data-seed="pl-${p.id}-wide" data-src="${esc(p.image)}" data-alt="${esc(p.imageAlt||p.name)}" data-keep="${esc((p.imageKeep||[]).join(","))}"></figure>
     <div class="wrap spd-grid">
       <div>
         <div class="panel-top"><span class="panel-no">${p.no}</span><span class="place-cat">${CAT[p.cat].en}<br><span class="cat-ja">${CAT[p.cat].ja}</span></span></div>
         <h2 class="spd-title" id="sheetTitle">${esc(p.name)}</h2>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}
-        <p class="spd-desc">${esc(p.desc)}${DRAFT(p.draft)}</p>
+        <div class="spd-desc">${paras(p.desc)}${DRAFT(p.draft)}</div>
       </div>
       <div>
         ${factsHTML(p)}
@@ -465,7 +560,7 @@ function spotSheet(p){
       </div>
     </div>
     ${eps.length?`<div class="wrap"><h3 class="sd-h">EPISODES<span>この場所が登場するエピソード</span></h3>
-    <ul class="spd-eps">${[...eps].reverse().map(e=>`<li><a href="#${e.id}" data-open="${e.id}"><figure class="frame poster" data-scene="${e.scene}" data-seed="${e.id}" data-src="${esc(e.image)}" data-alt="${esc(e.title)}"><div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${e.no}</span></div></figure><strong>${esc(e.title)}</strong><small>エピソードを見る →</small></a></li>`).join("")}</ul></div>`:""}
+    <ul class="spd-eps">${[...eps].reverse().map(e=>`<li><a href="#${e.id}" data-open="${e.id}"><figure class="frame poster" data-scene="${e.scene}" data-seed="${e.id}" data-src="${esc(e.image)}" data-alt="${esc(e.imageAlt||e.title)}" data-keep="${esc((e.imageKeep||[]).join(","))}"><div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${e.no}</span></div></figure><strong>${esc(e.title)}</strong><small>エピソードを見る →</small></a></li>`).join("")}</ul></div>`:""}
   </article>`;
 }
 /* すべてのエピソード（アーカイブ）— 本数が増えても1画面で探せる一覧 */
@@ -481,7 +576,7 @@ function archiveSheet(){
       ${cats.map(([c,ja])=>`<button class="arc-f" data-c="${esc(c)}" aria-pressed="false">${esc(c)}<small>${esc(ja)}</small></button>`).join("")}
     </div>
     <ol class="arc-grid">${EPISODES_NEW.map(e=>`<li data-c="${esc(e.category)}"><a href="#${e.id}" data-open="${e.id}">
-      <figure class="frame poster" data-scene="${e.scene}" data-seed="${e.id}" data-src="${esc(e.image)}" data-alt="${esc(e.title)}">
+      <figure class="frame poster" data-scene="${e.scene}" data-seed="${e.id}" data-src="${esc(e.image)}" data-alt="${esc(e.imageAlt||e.title)}" data-keep="${esc((e.imageKeep||[]).join(","))}">
         <div class="poster-ui" aria-hidden="true"><span class="p-ep">EP.${e.no}</span><span class="p-tags">${e===LATEST?'<span class="p-badge">LATEST</span>':""}${PH(e.image)}</span></div>
       </figure>
       <span class="arc-meta"><small>${esc(e.category)}　${esc(e.categoryJa)}</small><strong><span class="sr">EP.${e.no} </span>${esc(e.title)}</strong>${COPY(e,"arc-copy")}${e.published?`<small class="arc-date">${fmtDate(e.published)}</small>`:""}</span></a></li>`).join("")}</ol>
@@ -591,4 +686,4 @@ watchFrames();
 vidIO.observe(document.querySelector(".hero-media"));
 selectSpot(SITE.places[0].id);
 {const t=decodeURIComponent(location.hash.slice(1));if(t&&(t==="episodes"||EP[t]||t.startsWith("spot-"))){try{history.replaceState(null,"",location.pathname+location.search)}catch(_){}openSheet(t)}}
-let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>document.querySelectorAll(".frame[data-done]").forEach(f=>{if(f.querySelector("img,video"))return;const w=f.getBoundingClientRect().width;if(Math.abs(w-(+f.dataset.w||0))>w*.15)paintFrame(f,true)}),220)});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>document.querySelectorAll(".frame[data-done]").forEach(f=>{if(f.querySelector("img")){fitImage(f);return}if(f.querySelector("video"))return;const w=f.getBoundingClientRect().width;if(Math.abs(w-(+f.dataset.w||0))>w*.15)paintFrame(f,true)}),220)});

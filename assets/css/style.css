@@ -630,3 +630,21 @@ html:not(.show-draft) .draft-note{display:none}
 .sheet[data-theme="dark"] .facts .addr-map{color:#8FA996}
 .facts dd{min-width:0;overflow-wrap:anywhere}
 .facts-links a + a{margin-left:0}
+/* スポット紹介文：段落ごとに余白（ナレーションのように1文ずつ読ませる） */
+.spd-desc{display:flex;flex-direction:column;gap:.9em;max-width:32em}
+/* 文節で改行（対応ブラウザ）。非対応でも通常の日本語改行＋禁則で、句読点だけが次の行に落ちない */
+.spd-desc p{margin:0;line-height:2;word-break:normal;line-break:strict;overflow-wrap:anywhere;word-break:auto-phrase}
+/* 最終行が1〜2文字だけにならないよう、行の長さを整える（対応ブラウザ） */
+.spd-desc p{text-wrap:pretty}
+.spd-desc .draft{align-self:flex-start;margin-left:0}
+
+/* ---------- 撮影写真 ---------- */
+.frame > img.bd{filter:blur(22px) brightness(.5) saturate(.85);transform:scale(1.18)!important;z-index:0}
+.frame.fit-contain > img:not(.bd){z-index:1;box-shadow:0 8px 40px rgba(0,0,0,.35)}
+.frame.has-photo .ph-tag{display:none}
+/* 写真の上でもポスターの文字が読めるよう、右上〜下に薄い影（写真があるときだけ） */
+.poster.has-photo .poster-ui{background:
+  linear-gradient(180deg,rgba(10,14,15,.5),rgba(10,14,15,0) 26%,rgba(10,14,15,0) 58%,rgba(10,14,15,.72)),
+  linear-gradient(270deg,rgba(10,14,15,.42),rgba(10,14,15,0) 34%)}
+.poster.has-photo .p-title{text-shadow:0 1px 2px rgba(0,0,0,.5),0 0 22px rgba(0,0,0,.6)}
+.poster.has-photo .p-ep,.poster.has-photo .p-credit{text-shadow:0 1px 2px rgba(0,0,0,.45)}

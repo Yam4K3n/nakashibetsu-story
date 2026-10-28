@@ -32,7 +32,7 @@
 | スポットの写真 | 1600×1000 | 16:10 横長 | `assets/img/places/kaiyodai.jpg` |
 | プロローグの縦写真 | 1200×1600 | 3:4 縦長 | `assets/img/prologue-portrait.jpg` |
 | プロローグの横写真 | 2400×1004 | 2.39:1 シネマ | `assets/img/prologue-wide.jpg` |
-| ABOUTの写真 | 1000×1500 | 2:3 縦長 | `assets/img/about.jpg` |
+| ABOUTの写真 | 1200×1600 | 3:4 縦長 | `assets/img/about.jpg` |
 | SNS共有画像 | **1200×630（固定）** | — | `assets/img/ogp.jpg`（今の画像に上書き） |
 
 - 写真は枠いっぱいに自動でトリミングされます。比率が少し違っても表示できますが、**大事な被写体は中央寄りに**置くと切れにくくなります。
@@ -83,11 +83,17 @@ hero: {
 
 ### プロローグ・ABOUT の写真（同じく `media:` の中）
 
+現在は次のように設定しています（写真は `assets/img/media/`）。
+
 ```js
-"prologue-portrait": { src: "assets/img/prologue-portrait.jpg", alt: "空港に降り立つ主人公" },
-"prologue-wide":     { src: "assets/img/prologue-wide.jpg",     alt: "開陽台から見た地平線" },
-"about":             { src: "assets/img/about.jpg",             alt: "冬の牧草地" }
+"prologue-portrait": { src: "assets/img/media/prologue-airport.webp",     alt: "…", keep: [0.00, 0.40, 1.00, 0.635] },
+"prologue-wide":     { src: "assets/img/media/prologue-shelterbelt.webp", alt: "…", keep: [0.40, 0.63, 0.80, 0.90] },
+"about":             { src: "assets/img/media/about-winter.webp",         alt: "…", keep: [0.465, 0.415, 0.92, 0.735] }
 ```
+
+`keep` は、看板や木立など欠けてはいけない範囲です（`imageKeep` と同じ書き方。省略可）。
+
+**第三者の写真（フリー素材・Wikimedia Commons など）を使うときは**、フッターの「PHOTO CREDITS」（index.html の `.foot-credits`）と `PHOTO-CREDITS.md` に、撮影者・出典・ライセンス・加工の有無を書いてください。写真を差し替えて使わなくなったクレジットは消してください。
 
 `alt` には「写真の内容」を短く書きます（目の不自由な方の読み上げや検索に使われます）。
 

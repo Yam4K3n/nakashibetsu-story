@@ -206,7 +206,12 @@ const saveData = !!(navigator.connection && navigator.connection.saveData);
 
 function mediaFor(fig){
   const key = fig.dataset.media;
-  if(key && SITE.media[key]) return SITE.media[key];
+  if(key && SITE.media[key]){
+    const m=SITE.media[key];
+    // keep（欠けてはいけない範囲）を写真のトリミングに渡す
+    if(Array.isArray(m.keep)&&m.keep.length===4&&!fig.dataset.keep)fig.dataset.keep=m.keep.join(",");
+    return m;
+  }
   return { src: fig.dataset.src || "", alt: fig.dataset.alt || "" };
 }
 function paintCanvas(fig){

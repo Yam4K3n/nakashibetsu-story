@@ -77,6 +77,12 @@
 - [ ] 情報提供フォーム（Googleフォームなど）を作ったら `links.form` に URL を入れる（入れるまでボタンは非表示）
 - [ ] お問い合わせ先を決めたら `links.contact` に URL を入れる（入れるまでフッターの Contact は非表示）
 
+## 写真のクレジット（PHOTO CREDITS）
+
+- [ ] 防風林の写真：Wikimedia Commons の原本ページ（https://commons.wikimedia.org/wiki/File:Shelterbelt,_Naka-Shibetsu,_Japan.jpg）で、撮影者「NEXT-EXIT」とライセンス「CC BY-SA 3.0」がフッターの表記と一致している
+- [ ] 冬の写真：写真ACから正規にダウンロードした素材（素材ID 28835032）であること、利用規約（Webサイトの装飾写真としての利用・加工・再配布禁止）を写真ACのサイトで確認した
+- [ ] 写真を差し替えたら、フッターの PHOTO CREDITS と `PHOTO-CREDITS.md` も更新した（使わなくなったクレジットは削除）
+
 ## 7. 公開後に実機で確認
 
 - [ ] iPhone と Android で、ファーストビューの動画が再生される
@@ -85,4 +91,5 @@
 - [ ] 「Googleマップで開く」で正しい場所が開く
 - [ ] LINE や X にサイトのURLを貼り、共有画像とタイトルが表示される
   - 古い画像が出るときは、時間をおいてから再度試す（SNS側で画像が保存されているため）
+- [ ] PROLOGUE の空港の看板「中標津空港」・防風林の木立・ABOUT の冬の木立が、スマホ縦・横とPCで切れていない
 - [ ] check.html で「要修正」が 0 件

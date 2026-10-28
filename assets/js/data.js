@@ -38,9 +38,25 @@ const SITE = {
       poster: "",         // 例: "assets/img/hero.jpg"（動画読み込み前・省データ時に表示）
       alt: "中標津の一本道に立つ主人公"
     },
-    "prologue-portrait": { src: "", alt: "" },   // 例: "assets/img/prologue-portrait.jpg"（縦長 3:4）
-    "prologue-wide":     { src: "", alt: "" },   // 例: "assets/img/prologue-wide.jpg"（横長 2.39:1）
-    "about":             { src: "", alt: "" }    // 例: "assets/img/about.jpg"（縦長 2:3）
+    /* keep：欠けてはいけない範囲 [左, 上, 右, 下]（写真の幅・高さに対する 0〜1）。
+       枠の形が変わっても、この範囲が必ず入る位置で自動的に切り抜きます */
+    "prologue-portrait": {   // 縦長 3:4
+      src: "assets/img/media/prologue-airport.webp",
+      alt: "根室中標津空港のターミナルビル。「中標津空港」の看板と入口、手前に横断歩道",
+      keep: [0.00, 0.40, 1.00, 0.635]    // 看板・入口・建物
+    },
+    "prologue-wide": {       // 横長 2.39:1（スマホは 16:10）
+      src: "assets/img/media/prologue-shelterbelt.webp",
+      alt: "霧の牧草地の奥に続く防風林の木立と、草地で休む牛たち",
+      keep: [0.40, 0.63, 0.80, 0.90],    // 防風林の木立
+      // 写真：NEXT-EXIT / Wikimedia Commons / CC BY-SA 3.0（色調補正のみ。トリミング・縮小なし）→ フッターの PHOTO CREDITS に表記
+    },
+    "about": {               // 縦長 3:4
+      src: "assets/img/media/about-winter.webp",
+      alt: "一面の雪原に並んで立つ冬の木立",
+      keep: [0.465, 0.415, 0.92, 0.735]  // 木立（枝先〜根元）
+      // 写真：写真AC（撮影者 w.aoki・素材ID 28835032）→ フッターの PHOTO CREDITS に表記
+    }
   },
 
   categories: [

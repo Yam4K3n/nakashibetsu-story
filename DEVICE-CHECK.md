@@ -339,3 +339,50 @@ PC 1440／1280、iPad 1024×1366、タブレット 768、iPhone SE 375／iPhone 
 ## 未確認
 - iPhone Safari・Android Chrome の実機での表示・色の見え方（端末の画面によって色の印象は変わります）
 - 3公園の所在地の公式情報との照合（この環境から公式ページを開けないため）
+
+---
+
+# 追記：写真9枚の差し替え（2026-11-26）
+
+## 差し替えた写真
+| 場所 | 元ファイル | 掲載ファイル |
+|---|---|---|
+| EP.01 根室中標津空港 | 7C330B0C-9422-488D-BE21-7A6BF5D6852C.jpeg | episodes/ep-01-airport.webp・places/airport.webp |
+| EP.02 ミルクロード | D8CC3F88-12A1-4C19-8283-236A0032A17A.jpeg | episodes/ep-02-milk-road.webp・places/milk-road.webp |
+| EP.03 開陽台 | 2B20D381-9779-4879-91BB-9B48A3749225.jpeg | episodes/ep-03-kaiyodai.webp・places/kaiyodai.webp |
+| EP.04 ラ・キンコ | 0A8E8849-840A-4B62-A8FF-2900A6618113.jpeg | episodes/ep-04-la-kinko.webp・places/la-kinko.webp |
+| EP.05 ポルテ | 72DCC37E-12D5-47D3-B2A6-41F2E388E1E3.jpeg | episodes/ep-05-porte.webp・places/porte.webp |
+| EP.06 たら福 | EAF2C2A4-FCA9-4152-A19C-B6B4818F8B9D.jpeg | episodes/ep-06-tarafuku.webp・places/tarafuku.webp |
+| EP.07 GLOW | 2CAA0D87-A3AA-44E1-B41C-191BEBA5D7A8.jpeg | episodes/ep-07-glow.webp・places/glow.webp |
+| PROLOGUE 防風林 | DFE3F561-B1F9-410A-B545-359D666C59F6.jpeg | media/prologue-shelterbelt.webp |
+| ABOUT 冬景色 | 118E7EFF-74A9-46E6-B0E0-3A648E17A671.jpeg | media/about-winter.webp |
+
+- 色調補正は追加せず、切り抜き（エピソード用 4:5）・縮小・WebP 変換のみ。版番号（EP.01〜07 は `?v=4`、防風林・冬景色は `?v=2`）で古い写真がブラウザに残らないようにした
+- ABOUT のキャプションを「同じ故郷、違う季節。」に変更。PHOTO CREDITS の加工内容を「フィルム調の色調・粒子の加工」に更新
+- EP.07 GLOW：右の投影スクリーンは無地、バー奥のテレビは色が流れた抽象的な映像で、判別できる第三者の映像はないため追加の加工なし
+
+## 確認結果（Chromium・Webフォントあり・12画面）
+- 機能テスト 370項目中 369項目合格（不合格1件は前回から存在：320px幅でピン01が「演出用の概略図」の角に重なる）。EP.08〜10・3公園のデータ、全10話の文章・SNS URL・所在地・Googleマップ検索は前回と同一
+- 写真の配置 648/648 合格（全10話・10スポット × 6か所 × 12画面）、PROLOGUE・ABOUT の写真 36/36 合格（防風林の木立と牛、冬の木立が欠けず、余白なし）
+- 前回版との画像比較：JOIN は同一。PROLOGUE は防風林の枠、ABOUT は写真とキャプション、フッターはクレジット文の範囲だけが変化（空港写真は同一）
+- 読み込みエラー・JSエラー・横はみ出しなし。check.html（ローカル）要修正 0件
+
+## 未確認
+- iPhone Safari・Android Chrome の実機
+- 写真ACの現行の利用規約（この環境から規約ページを開けないため）と、素材を正規に取得したこと
+
+---
+
+# 追記：PROLOGUE を演出用イラストに変更（2026-11-26）
+
+- 「帰郷の日」（SCENE 01 — ARRIVAL・3:4）と「牧草地と防風林」（2.39:1）を、トップの一本道と同じ配色・部品（空・金色の光・山並み・木立・防風林・人物・粒子と周辺減光）で描くイラストに変更。画面の大きさに合わせてその場で描くため、画像ファイルは不要
+- 写真 `media/prologue-airport.webp`・`media/prologue-shelterbelt.webp` を削除。PHOTO CREDITS から防風林（NEXT-EXIT / Wikimedia Commons / CC BY-SA 3.0）を外した（記録は PHOTO-CREDITS.md に残す）
+
+## 確認結果（Chromium・Webフォントあり）
+- 12画面で、2枚のイラストが枠と同じ縦横比で描かれ、写真・「イメージ図」の表示なし、横はみ出しなし
+- 機能テスト 370項目中 369項目合格（不合格1件は前回から存在：320px幅でピン01が「演出用の概略図」の角に重なる）
+- 前回版との画像比較：ABOUT・JOIN は4画面で画素単位で同一。変化は PROLOGUE の2枚の範囲と、クレジットが1件減ったフッターのみ
+- check.html（ローカル）：要修正 0件
+
+## 未確認
+- iPhone Safari・Android Chrome の実機での表示

@@ -192,6 +192,123 @@ S.shelf = (c,w,h,r) => {
   const g=c.createRadialGradient(w*.45,h*.28,0,w*.45,h*.28,Math.hypot(w,h)*.65);g.addColorStop(0,"rgba(255,200,130,0.10)");g.addColorStop(.45,"rgba(12,9,7,0.15)");g.addColorStop(1,"rgba(8,6,5,0.78)");c.fillStyle=g;c.fillRect(0,0,w,h);
 };
 
+/* PROLOGUE 用の演出イラスト（トップの一本道 S.road と同じ配色・部品で描く）
+   SCENE 01 — ARRIVAL ：夕暮れの空港と、帰郷した主人公の小さな後ろ姿（縦 3:4）
+   SCENE 02 — THE HORIZON：牧草地と格子状に続く防風林（横 2.39:1） */
+
+/* 遠景ほど空の色に溶ける：色 a を霞の色 b へ t の割合で寄せる */
+function haze(a,b,t){const p=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));const A=p(a),B=p(b);return"#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")}
+
+/* 後ろ姿（主人公）：walker と同じ描き方で、スーツケースを引いて建物の方を向く */
+function backFigure(c,x,yb,fh,col){
+  c.fillStyle=col;const hr=fh*.07;
+  c.beginPath();c.arc(x,yb-fh+hr,hr,0,7);c.fill();                       // 頭
+  rrect(c,x-fh*.12,yb-fh*.86,fh*.24,fh*.44,fh*.07);                       // 胴（コート）
+  c.fillRect(x-fh*.09,yb-fh*.46,fh*.075,fh*.46);c.fillRect(x+fh*.015,yb-fh*.46,fh*.075,fh*.46); // 脚
+  rrect(c,x-fh*.1,yb-fh*.84,fh*.2,fh*.26,fh*.05);                         // リュック（後ろ姿の目印）
+  const sw=fh*.2,sh=fh*.27;rrect(c,x+fh*.16,yb-sh,sw,sh,fh*.025);          // スーツケース
+  c.fillRect(x+fh*.16+sw*.45,yb-sh-fh*.15,Math.max(1,fh*.016),fh*.15);
+  c.strokeStyle=col;c.lineCap="round";c.lineWidth=fh*.05;c.beginPath();c.moveTo(x+fh*.09,yb-fh*.78);c.lineTo(x+fh*.18,yb-fh*.43);c.stroke();
+  ell(c,x+fh*.05,yb+fh*.015,fh*.34,fh*.026,"rgba(0,0,0,0.38)");
+}
+
+S.arrival = (c,w,h,r) => {
+  const hy=h*.6, vx=w*.5;
+  /* 空：一本道と同じ夕暮れのグラデーション。地平線のくすんだ金 */
+  c.fillStyle=lin(c,0,0,0,hy,[[0,"#0A1012"],[.45,"#1A2527"],[.8,"#3C443F"],[1,"#8A7352"]]);c.fillRect(0,0,w,hy+1);
+  glow(c,w*.3,hy-h*.02,Math.max(w,h)*.5,"rgba(224,170,104,0.42)");
+  streaks(c,w,hy,r,"rgba(214,198,170,",8);
+  for(let i=0;i<40;i++){c.fillStyle=`rgba(230,225,210,${(.05+r()*.2).toFixed(2)})`;const s=.4+r()*1.1;c.fillRect(r()*w,r()*hy*.35,s,s)}
+  ridge(c,w,h,hy+1,h*.03,"rgba(56,68,70,0.8)",r,1.3);
+  horizonTrees(c,w,hy,h,haze("#141B1B","#3C443F",.25),r,.012,.012);
+
+  /* 空港ターミナル：平たい幾何学のシルエット（実在の形状は再現しない） */
+  const bx0=w*.06,bx1=w*.94,base=hy+h*.035,bh=h*.085;
+  c.fillStyle="#111819";c.fillRect(bx0,base-bh,bx1-bx0,bh);                              // 本体
+  c.fillStyle="#0D1314";c.fillRect(bx0+w*.08,base-bh*1.55,w*.34,bh*.6);                 // 上の階（看板のある壁）
+  c.fillStyle="#0B1011";c.fillRect(w*.72,base-bh*2.6,w*.05,bh*1.7);                     // 管制塔
+  quad(c,w*.705,base-bh*2.6,w*.785,base-bh*2.6,w*.775,base-bh*3.05,w*.715,base-bh*3.05);
+  c.fillStyle="rgba(224,170,104,0.55)";c.fillRect(w*.712,base-bh*2.92,w*.066,bh*.16);   // 管制塔の窓（金）
+  c.fillRect(w*.745-1,base-bh*3.4,Math.max(1,w*.003),bh*.35);                           // アンテナ
+  glow(c,w*.746,base-bh*3.4,w*.018,"rgba(226,70,60,0.6)");                              // 航空障害灯
+  /* 夕日のふちどり：屋根の上端に細い金の線（建物の形を読みやすく） */
+  c.fillStyle="rgba(224,170,104,0.45)";const rim=Math.max(1,h*.0018);
+  c.fillRect(bx0,base-bh,bx1-bx0,rim);c.fillRect(bx0+w*.08,base-bh*1.55,w*.34,rim);c.fillRect(w*.715,base-bh*3.05,w*.06,rim);
+  /* 看板：文字は描かず、くすんだ金の帯で表す */
+  c.fillStyle="rgba(196,150,92,0.85)";c.fillRect(w*.17,base-bh*1.35,w*.2,bh*.13);
+  /* 入口のひさし（三角の屋根）と柱 */
+  c.fillStyle="#070A0B";quad(c,w*.16,base-bh*.52,w*.6,base-bh*.52,w*.64,base-bh*.36,w*.12,base-bh*.36);
+  c.beginPath();c.moveTo(w*.3,base-bh*.52);c.lineTo(w*.38,base-bh*.9);c.lineTo(w*.46,base-bh*.52);c.fill();
+  c.fillStyle="rgba(224,170,104,0.32)";c.fillRect(w*.12,base-bh*.36,w*.52,Math.max(1,h*.0015));   // ひさしの縁
+  for(const X of [.2,.32,.44,.56])c.fillRect(w*X,base-bh*.36,Math.max(2,w*.012),bh*.36);
+  /* 窓の灯り（暖色・控えめ） */
+  for(let i=0;i<26;i++){const x=w*(.08+i*.033);if(x>w*.9)break;const lit=r()<.75;c.fillStyle=lit?`rgba(232,184,120,${(.35+r()*.35).toFixed(2)})`:"rgba(60,70,70,0.6)";c.fillRect(x,base-bh*.78,w*.018,bh*.16)}
+  c.fillStyle="rgba(236,196,132,0.55)";c.fillRect(w*.33,base-bh*.33,w*.1,bh*.33);       // 入口の明かり
+  glow(c,w*.38,base-bh*.15,w*.16,"rgba(232,184,120,0.20)");
+
+  /* 地面：前庭と駐車場。一本道と同じ暗い緑のグラデーション */
+  c.fillStyle=lin(c,0,base,0,h,[[0,"#2A302B"],[.35,"#161C1A"],[1,"#090C0C"]]);c.fillRect(0,base,w,h-base);
+  c.fillStyle="rgba(255,240,210,0.035)";for(let z=1.1;z<60;z*=1.18){const y=base+(h-base)/z;c.fillRect(0,y,w,Math.max(1,h*.0012))}
+  /* 駐車場の白線（遠近でそろえる） */
+  c.strokeStyle="rgba(235,228,210,0.07)";c.lineWidth=Math.max(1,w*.0016);
+  for(const X of [-3,-1,1,3]){c.beginPath();c.moveTo(vx+X*w*.03,base+(h-base)*.3);c.lineTo(vx+X*w*.2,h);c.stroke()}
+  c.beginPath();c.moveTo(0,base+(h-base)*.3);c.lineTo(w,base+(h-base)*.3);c.stroke();
+  /* 両脇の防風林（一本道と同じ windbreak） */
+  windbreak(c,w,h,base,w*.5,-3.3,1.1,"#0D1313",r,.5);
+  windbreak(c,w,h,base,w*.5,3.6,1.0,"#0D1313",r,.5);
+  /* 街灯：金色の点光 */
+  for(const [X,z] of [[-1.5,1.6],[1.4,1.9],[-1.2,3.2],[1.15,4]]){const s=1/z,x=vx+X*w*.5*s,yb=base+(h-base)*s,ph=(h-base)*1.6*s;c.fillStyle="#0A0E0F";c.fillRect(x-1,yb-ph,Math.max(2,w*.004*s*2),ph);glow(c,x,yb-ph,w*.06*s*2,"rgba(236,196,132,0.35)");c.fillStyle="rgba(246,226,186,0.95)";c.beginPath();c.arc(x,yb-ph,Math.max(1.2,w*.005*s*2),0,7);c.fill()}
+  /* 地表の霧 */
+  c.fillStyle=lin(c,0,base-h*.06,0,base+h*.06,[[0,"rgba(150,138,112,0)"],[.55,"rgba(150,138,112,0.22)"],[1,"rgba(150,138,112,0)"]]);c.fillRect(0,base-h*.06,w,h*.12);
+  /* 主人公：手前に小さく、建物を見上げる後ろ姿 */
+  const fy=h*.88,fh=h*.13;backFigure(c,w*.44,fy,fh,"#05080A");
+};
+
+S.horizon = (c,w,h,r) => {
+  const hy=h*.42, vx=w*.56;
+  /* 空：一本道と同じ配色。低い雲の筋と、地平線の金色 */
+  c.fillStyle=lin(c,0,0,0,hy,[[0,"#0A1012"],[.42,"#1A2527"],[.78,"#3C443F"],[1,"#8A7352"]]);c.fillRect(0,0,w,hy+1);
+  glow(c,w*.62,hy+h*.01,Math.max(w,h)*.42,"rgba(224,170,104,0.40)");
+  streaks(c,w,hy,r,"rgba(214,198,170,",12);
+  ridge(c,w,h,hy+1,h*.05,"rgba(56,68,70,0.7)",r,1.2);
+  ridge(c,w,h,hy+1,h*.025,"rgba(46,56,56,0.85)",r,2.4);
+
+  /* 牧草地：遠景ほど霞む区画。一本道の地面と同じ暗い緑の系統で、区画ごとにわずかに明暗を変える */
+  const H0="#3C443F";               // 霞の色（空の地平線寄りの色）
+  c.fillStyle=lin(c,0,hy,0,h,[[0,"#2A302B"],[.35,"#161C1A"],[1,"#090C0C"]]);c.fillRect(0,hy,w,h-hy);
+  const Z=[];for(let z=1;z<90;z*=1.14)Z.push(z);
+  const U=w*.085;                                                   // 区画の幅（手前）
+  const P=(X,z)=>[vx+X*U/z,hy+(h-hy)/z];
+  const T=z=>Math.min(1,Math.log(z)/Math.log(60));                  // 0=手前, 1=地平線
+  const field=["#252C27","#1E2521","#2B312A","#222823","#283026"];
+  for(let j=0;j<Z.length-1;j++)for(let X=-80;X<80;X++){const [a,b]=P(X,Z[j]),[d]=P(X+1,Z[j]),[f,g]=P(X+1,Z[j+1]),[k]=P(X,Z[j+1]);
+    if(Math.max(a,d,f,k)<0||Math.min(a,d,f,k)>w)continue;c.fillStyle=haze(field[(r()*field.length)|0],H0,T(Z[j])*.75);quad(c,a,b,d,b,f,g,k,g)}
+  /* 格子状の防風林：奥へ収束する列（4区画ごと）と、横に走る列（3段ごと）。遠いほど細く淡い */
+  const tri=(x,y,th)=>{const tw=th*.3;c.moveTo(x-tw,y);c.lineTo(x,y-th);c.lineTo(x+tw,y)};
+  const TH=z=>(h-hy)*.16/z;
+  // 奥へ収束する列：遠い順に描く（手前の木が遠くの木に重なる）
+  for(let j=Z.length-2;j>=0;j--){
+    const z0=Z[j],z1=Z[j+1];c.fillStyle=haze("#0D1313",H0,T(z0)*.8);c.beginPath();
+    for(let X=-78;X<=78;X+=6){const [xa]=P(X,z0);if(Math.abs(xa-vx)>w*1.2)continue;
+      let z=z0;while(z<z1){const [x,y]=P(X,z),th=TH(z)*(.8+r()*.35);if(x>-w*.05&&x<w*1.05)tri(x,y,th);z+=Math.max(.004,.012*z*(.5+r()));}
+      // 列の根元を帯でつなぐ（一本道の防風林と同じく、連なった木立に見せる）
+      const [a,b]=P(X-.06,z0),[d]=P(X+.06,z0),[f,g]=P(X+.06,z1),[k]=P(X-.06,z1),th0=TH(z0)*.2,th1=TH(z1)*.2;
+      c.moveTo(a,b);c.lineTo(d,b);c.lineTo(f,g);c.lineTo(k,g);c.closePath();
+      c.moveTo(a,b);c.lineTo(d,b);c.lineTo(d,b-th0);c.lineTo(a,b-th0);c.closePath();}
+    c.fill();
+    if(j%3===2){const [a,y]=P(-80,z0),[d]=P(80,z0),th=TH(z0);c.fillStyle=haze("#0F1615",H0,T(z0)*.8);c.beginPath();
+      for(let x=Math.max(-10,a);x<Math.min(w+10,d);x+=Math.max(1.2,th*.3*(.5+r()*.8)))tri(x,y,th*(.7+r()*.45));c.fill();
+      c.fillRect(Math.max(0,a),y-th*.16,Math.min(w,d)-Math.max(0,a),th*.18)}
+  }
+  /* 中景の牛舎とサイロ（小さなシルエット） */
+  {const z=3.4,[x,y]=P(-9,z),s=TH(z)*1.2;c.fillStyle=haze("#0B1011",H0,T(z)*.5);c.fillRect(x,y-s*.55,s*1.5,s*.55);
+   c.beginPath();c.moveTo(x-s*.05,y-s*.53);c.lineTo(x+s*.2,y-s*.85);c.lineTo(x+s*.75,y-s*1.02);c.lineTo(x+s*1.3,y-s*.85);c.lineTo(x+s*1.55,y-s*.53);c.fill();
+   c.fillRect(x+s*1.62,y-s*1.25,s*.36,s*1.25);ell(c,x+s*1.8,y-s*1.25,s*.18,s*.1,c.fillStyle);
+   c.fillStyle="rgba(232,184,120,0.55)";c.fillRect(x+s*.62,y-s*.3,s*.18,s*.14)}
+  /* 地平線の霧と、牧草のかすかな筋 */
+  c.fillStyle=lin(c,0,hy-h*.05,0,hy+h*.07,[[0,"rgba(150,138,112,0)"],[.5,"rgba(150,138,112,0.26)"],[1,"rgba(150,138,112,0)"]]);c.fillRect(0,hy-h*.05,w,h*.12);
+  for(let i=0;i<900;i++){const y=hy+(h-hy)*(.25+r()*.75),k=(y-hy)/(h-hy),x=r()*w,l=h*(.004+r()*.016)*k;c.fillStyle=r()<.6?"rgba(10,14,12,0.25)":"rgba(220,210,170,0.05)";c.fillRect(x,y-l,Math.max(1,w*.0008*k),l)}
+};
 let GRAIN;
 function grainTile(){if(GRAIN)return GRAIN;const c=document.createElement("canvas");c.width=c.height=160;const x=c.getContext("2d"),d=x.createImageData(160,160);for(let i=0;i<d.data.length;i+=4){const v=(Math.random()*255)|0;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}x.putImageData(d,0,0);GRAIN=c;return c}
 function finish(c,w,h){c.save();c.globalAlpha=.09;c.globalCompositeOperation="overlay";c.fillStyle=c.createPattern(grainTile(),"repeat");c.fillRect(0,0,w,h);c.restore();

@@ -553,7 +553,8 @@ pg.innerHTML=SITE.places.map(p=>{
   <h3>${esc(p.name)}</h3>${p.nameEn?`<p class="place-en">${esc(p.nameEn)}</p>`:""}<p class="place-desc">${esc(firstPara(p.desc))}${DRAFT(p.draft)}</p>
   ${eps.length?`<p class="place-ep">${eps.map(e=>`EP.${e.no}「${esc(e.title)}」`).join(" / ")}に登場</p>`:""}</div></a></article>`}).join("")
   +`<p class="place-empty" id="placeEmpty" hidden>このカテゴリのスポットは、取材をしたあとに追加していきます。<br>おすすめの場所があれば、<a href="#join">情報募集</a>から教えてください。</p>`;
-fl.innerHTML=SITE.categories.map((c,i)=>`<button class="fbtn" data-f="${c.id}" aria-pressed="${i===0}"><b>${c.en}<sup>${catCount(c.id)}</sup></b><small>${c.ja}</small></button>`).join("");
+// スポットが0件のカテゴリはボタンを出さない（スポットを追加すると自動で表示される）
+fl.innerHTML=SITE.categories.filter(c=>c.id==="ALL"||catCount(c.id)>0).map((c,i)=>`<button class="fbtn" data-f="${c.id}" aria-pressed="${i===0}"><b>${c.en}<sup>${catCount(c.id)}</sup></b><small>${c.ja}</small></button>`).join("");
 const SIZES=[["sz-a"],["sz-b","off"],["sz-b"],["sz-a"]];
 function layoutPlaces(){let i=0;pg.querySelectorAll(".place").forEach(el=>{el.classList.remove("sz-a","sz-b","off","wide-md");if(el.hidden)return;el.classList.add(...SIZES[i%4]);if(i%3===0)el.classList.add("wide-md");i++});return i}
 function applyFilter(f){

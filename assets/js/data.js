@@ -83,7 +83,7 @@ const SITE = {
       copy: "物語は、ここから始まる。",
       lead: "10年ぶりに降り立った故郷。懐かしいはずの場所から、まだ知らない中標津を探す旅が始まる。",
       draft: false,         // 文章が仮置きの場合は true（「仮テキスト」ラベルが付きます）
-      image: "assets/img/episodes/ep-01-airport.webp",
+      image: "assets/img/episodes/ep-01-airport.webp?v=3",
       imageAlt: "根室中標津空港のターミナルビルと「中標津空港」の看板",
       imageKeep: [0.46, 0.329, 0.8, 0.671],   // 看板など、欠けてはいけない範囲 [左,上,右,下]（0〜1）
       scene: "airport",     // 写真が無い間の仮ビジュアル
@@ -99,7 +99,7 @@ const SITE = {
       copy: "この道は、どこまで続くんだろう。",
       lead: "どこまでもまっすぐに伸びるミルクロード。見慣れたはずの景色が、10年という時間を経て、少し違って見えた。",
       draft: false,
-      image: "assets/img/episodes/ep-02-milk-road.webp",
+      image: "assets/img/episodes/ep-02-milk-road.webp?v=3",
       imageAlt: "青空の下、牧草地のあいだをまっすぐに延びるミルクロード",
       imageKeep: [0.2, 0.187, 0.85, 0.813],   // 看板など、欠けてはいけない範囲 [左,上,右,下]
       scene: "road",
@@ -115,7 +115,7 @@ const SITE = {
       copy: "変わらない景色に、変わった自分がいた。",
       lead: "目の前に広がる開陽台の大パノラマ。あの頃と同じ景色を、今の自分はどう感じるのだろう。",
       draft: false,
-      image: "assets/img/episodes/ep-03-kaiyodai.webp",
+      image: "assets/img/episodes/ep-03-kaiyodai.webp?v=3",
       imageAlt: "「開陽台」と書かれた白い塔と、青空の下に広がる牧草地",
       imageKeep: [0.02, 0.166, 0.46, 0.834],   // 看板など、欠けてはいけない範囲 [左,上,右,下]
       scene: "panorama",
@@ -131,7 +131,7 @@ const SITE = {
       copy: "あの味は、まだここにあった。",
       lead: "故郷で再び訪れたラ・キンコ。懐かしさと新しい発見が交差する、思い出の一皿。",
       draft: false,
-      image: "assets/img/episodes/ep-04-la-kinko.webp",
+      image: "assets/img/episodes/ep-04-la-kinko.webp?v=3",
       imageAlt: "タイル張りの外壁に掲げられたラ・キンコの楕円形の看板",
       imageKeep: [0.06, 0.201, 0.94, 0.799],   // 看板など、欠けてはいけない範囲 [左,上,右,下]
       scene: "town",
@@ -147,7 +147,7 @@ const SITE = {
       copy: "選べない幸せが、ここにある。",
       lead: "ショーケースに並ぶ、色とりどりのケーキたち。どれにしようか迷う時間さえ楽しい。ポルテで見つけた、小さな幸せ。",
       draft: false,
-      image: "assets/img/episodes/ep-05-porte.webp",
+      image: "assets/img/episodes/ep-05-porte.webp?v=3",
       imageAlt: "夢みるケーキ屋 ポルテの壁に掲げられた「Porte du bonheur」の看板",
       imageKeep: [0.0, 0.211, 0.96, 0.819],   // 看板など、欠けてはいけない範囲 [左,上,右,下]
       scene: "cafe",
@@ -163,7 +163,7 @@ const SITE = {
       copy: "変わらない一杯に、会いに行く。",
       lead: "故郷で味わう、らー麺 たら福の一杯。湯気の向こうに広がる、また食べたくなる味。",
       draft: false,
-      image: "assets/img/episodes/ep-06-tarafuku.webp",
+      image: "assets/img/episodes/ep-06-tarafuku.webp?v=3",
       imageAlt: "れんが造りの塔と黄色い壁が特徴的な、らー麺 たら福の外観",
       imageKeep: [0.066, 0.04, 0.935, 0.72],   // 看板など、欠けてはいけない範囲 [左,上,右,下]
       scene: "food",
@@ -180,9 +180,9 @@ const SITE = {
       copy: "この街の夜は、まだまだ面白い。",
       lead: "豊富なボードゲームと、気軽に遊べる驚きの価格。GLOWで出会った、中標津の夜の新しい楽しみ方。",
       draft: false,
-      image: "assets/img/episodes/ep-07-glow.webp?v=2",   // ?v=2：スクリーン部分を加工した版（古い画像が残らないよう版番号を付与）
+      image: "assets/img/episodes/ep-07-glow.webp?v=3",   // スクリーン部分を加工した版。?v=3：全10話の色調をそろえた版（古い画像が残らないよう版番号を付与）
       imageAlt: "ネオンの照明に照らされた GLOW -Amusement Bar- の店内とカウンター",
-      imageKeep: [0.0, 0.189, 0.76, 0.851],   // 看板など、欠けてはいけない範囲 [左,上,右,下]
+      imageKeep: [0.0, 0.40, 0.87, 0.68],     // 棚・青く光るカウンター・ネオン「GLOW」
       scene: "shelf",
       tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7699788500802997525",
       instagram: "https://www.instagram.com/reel/De1NtArT_mv/",
@@ -194,11 +194,11 @@ const SITE = {
       title: "森林公園", titleEn: "MIDORIGAOKA FOREST PARK",
       category: "FIND", categoryJa: "違いを探す",   // カテゴリは仮（変更可）
       copy: "森の中には、忘れていた時間が流れていた。",
-      lead: "街のすぐそばに広がる、緑豊かな森林公園。木々に囲まれた静かな空間で、故郷の自然ともう一度向き合う。",
+      lead: "街のすぐそばにあるのに、そこには少し別の時間が流れていた。\n木々のあいだを歩きながら、慌ただしい毎日では気づけなかった静けさに触れていく。\n何気ない故郷の景色が、今日は少しだけ特別に見えた。",
       draft: false,
-      image: "",            // 写真が届いたら 例: "assets/img/episodes/ep-08-forest-park.webp"（空欄の間は演出用ビジュアル）
-      imageAlt: "",         // 例: "木々に囲まれた中標津町緑ヶ丘森林公園の散策路"
-      imageKeep: [],        // 看板など、欠けてはいけない範囲 [左,上,右,下]（写真を入れたら設定）
+      image: "assets/img/episodes/ep-08-midorigaoka.webp?v=3",
+      imageAlt: "紅葉したカエデと白樺の林、ウッドデッキに置かれたベンチ",
+      imageKeep: [0.29, 0.62, 0.885, 0.86],   // ベンチと椅子
       scene: "field",
       tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7700901387663658261",
       instagram: "https://www.instagram.com/p/De8771gTDxh/",
@@ -210,11 +210,11 @@ const SITE = {
       title: "旭ヶ丘ふれあい公園", titleEn: "ASAHIGAOKA FUREAI PARK",
       category: "FIND", categoryJa: "違いを探す",   // カテゴリは仮（変更可）
       copy: "あの頃の遊び場は、今も誰かの思い出をつくっている。",
-      lead: "子どもの頃に親しんだ公園。変わった景色と、変わらない懐かしさ。時が流れても、ここには新しい思い出が生まれ続けている。",
+      lead: "子どもの頃に親しんだ公園。\n久しぶりに訪れると、景色は少し変わっていても、懐かしさだけはそのままだった。\nここで過ごす時間は、今も誰かの思い出になっていく。",
       draft: false,
-      image: "",            // 例: "assets/img/episodes/ep-09-asahigaoka.webp"
-      imageAlt: "",
-      imageKeep: [],
+      image: "assets/img/episodes/ep-09-asahigaoka.webp?v=3",
+      imageAlt: "青空と白い雲の下、芝生の先に並ぶ旭ヶ丘ふれあい公園の大型遊具",
+      imageKeep: [0.29, 0.50, 1.0, 0.77],      // 遊具
       scene: "town",
       tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7707619095734144262",
       instagram: "https://www.instagram.com/p/Dfrj-afTTgq/",
@@ -226,11 +226,11 @@ const SITE = {
       title: "ゆめの森公園", titleEn: "YUME NO MORI PARK",
       category: "FIND", categoryJa: "違いを探す",   // カテゴリは仮（変更可）
       copy: "あの頃のワクワクは、大人になっても変わらない。",
-      lead: "空港のすぐそばに広がる、遊びと自然が出会う場所。子どもも大人も夢中になれる空間で、今の中標津の新しい魅力を見つける。",
+      lead: "空港の近くに広がる、遊びと自然が出会う場所。\n子どもの頃に感じたワクワクは、大人になった今でもちゃんと残っていた。\n夢中になれる景色は、いつだって故郷の中にある。",
       draft: false,
-      image: "",            // 例: "assets/img/episodes/ep-10-yumenomori.webp"
-      imageAlt: "",
-      imageKeep: [],
+      image: "assets/img/episodes/ep-10-yumenomori.webp?v=3",
+      imageAlt: "「ゆめの森公園 ビジターセンター」の看板と、青空の下のドーム型の建物",
+      imageKeep: [0.46, 0.64, 0.89, 0.835],    // 看板の文字「ゆめの森公園 ビジターセンター」とロゴ
       scene: "panorama",
       tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7710571445444758790",
       instagram: "https://www.instagram.com/p/DgACLgwzBzE/",
@@ -259,7 +259,7 @@ const SITE = {
       id: "airport", no: "01",
       name: "根室中標津空港", nameEn: "Nemuro Nakashibetsu Airport",
       cat: "LOCAL", scene: "airport",
-      image: "assets/img/places/airport.webp", imageAlt: "根室中標津空港のターミナルビルと「中標津空港」の看板",
+      image: "assets/img/places/airport.webp?v=3", imageAlt: "根室中標津空港のターミナルビルと「中標津空港」の看板",
       imageKeep: [0.46, 0.4, 0.8, 0.5],            // 例: "assets/img/places/airport.jpg"（横長 16:10 推奨）
       desc: "10年ぶりに帰ってきた、故郷の空の玄関口。\n見慣れたはずの場所が、今日は少し違って見える。\n懐かしい気持ちと、これから出会う景色への期待。\n変わったものも、変わらないものも。\n中標津浦島物語は、ここから始まる。",
       draft: false,          // 説明文が仮の場合は true
@@ -276,7 +276,7 @@ const SITE = {
     {
       id: "milk-road", no: "02",
       name: "ミルクロード", nameEn: "Milk Road",
-      cat: "NATURE", scene: "road", image: "assets/img/places/milk-road.webp", imageAlt: "青空の下、牧草地のあいだをまっすぐに延びるミルクロード",
+      cat: "NATURE", scene: "road", image: "assets/img/places/milk-road.webp?v=3", imageAlt: "青空の下、牧草地のあいだをまっすぐに延びるミルクロード",
       imageKeep: [0.3, 0.375, 0.75, 0.565],
       desc: "どこまでもまっすぐに伸びる道と、その先まで広がる空。\n昔からそこにあった景色なのに、今はなぜか新鮮に映る。\n急ぐ理由なんてない。ただ、この道を走っていたい。\n何気ない景色さえ、帰ってきた今だからこそ特別に思える。\nこの道の先には、まだ知らない故郷が待っている。",
       draft: false,
@@ -293,7 +293,7 @@ const SITE = {
     {
       id: "kaiyodai", no: "03",
       name: "開陽台", nameEn: "Kaiyodai",
-      cat: "NATURE", scene: "panorama", image: "assets/img/places/kaiyodai.webp", imageAlt: "「開陽台」と書かれた白い塔と、青空の下に広がる牧草地",
+      cat: "NATURE", scene: "panorama", image: "assets/img/places/kaiyodai.webp?v=3", imageAlt: "「開陽台」と書かれた白い塔と、青空の下に広がる牧草地",
       imageKeep: [0.04, 0.395, 0.44, 0.585],
       desc: "見渡す限りの緑と、どこまでも続く地平線。\nあの頃も、きっと同じ景色がここに広がっていた。\n変わらずそこにある風景と、10年という時間を過ごした自分。\n同じ場所に立っているのに、見える世界は少し違う。\n変わらない景色が、故郷の魅力をもう一度教えてくれた。",
       draft: false,
@@ -310,8 +310,8 @@ const SITE = {
     {
       id: "la-kinko", no: "04",
       name: "ラ・キンコ", nameEn: "",
-      cat: "FOOD", scene: "town", image: "assets/img/places/la-kinko.webp", imageAlt: "タイル張りの外壁に掲げられたラ・キンコの楕円形の看板",
-      imageKeep: [0.06, 0.29, 0.94, 0.71],
+      cat: "FOOD", scene: "town", image: "assets/img/places/la-kinko.webp?v=3", imageAlt: "タイル張りの外壁に掲げられたラ・キンコの楕円形の看板",
+      imageKeep: [0.2, 0.32, 0.92, 0.605],   // 看板の文字（Là Kinko Restaurant.Pub／NAKASHIBETSU. CHEZ MOI 3-2）
       desc: "学生時代から通い続けた、思い出のレストラン。\n豊富なメニューと、どこか心がほっとする優しい空間。\n大人になった今も、あの頃と変わらない味が迎えてくれる。\n何度訪れても、また帰ってきたくなる場所。",
       draft: false,
       address: "北海道標津郡中標津町西3条北2丁目1",
@@ -327,7 +327,7 @@ const SITE = {
     {
       id: "porte", no: "05",
       name: "夢みるケーキ屋 ポルテ", nameEn: "",
-      cat: "FOOD", scene: "cafe", image: "assets/img/places/porte.webp", imageAlt: "夢みるケーキ屋 ポルテの壁に掲げられた「Porte du bonheur」の看板",
+      cat: "FOOD", scene: "cafe", image: "assets/img/places/porte.webp?v=3", imageAlt: "夢みるケーキ屋 ポルテの壁に掲げられた「Porte du bonheur」の看板",
       imageKeep: [0.0, 0.26, 0.96, 0.83],
       desc: "目移りするほど色鮮やかなケーキたち。\nどれにしようか迷う時間さえ、ここでは幸せなひととき。\n誰かに愛され、その想いがまた誰かへとつながっていく。\nあの頃にはなかったケーキ屋が、今は誰かの大切な思い出になっている。",
       draft: false,
@@ -344,7 +344,7 @@ const SITE = {
     {
       id: "tarafuku", no: "06",
       name: "らー麺 たら福", nameEn: "",
-      cat: "FOOD", scene: "food", image: "assets/img/places/tarafuku.webp", imageAlt: "れんが造りの塔と黄色い壁が特徴的な、らー麺 たら福の外観",
+      cat: "FOOD", scene: "food", image: "assets/img/places/tarafuku.webp?v=3", imageAlt: "れんが造りの塔と黄色い壁が特徴的な、らー麺 たら福の外観",
       imageKeep: [0.12, 0.26, 0.76, 0.7],
       desc: "子どもの頃、家族とよく訪れたラーメン屋。\nあの頃は、いつも決まって同じメニューを頼んでいた。\n大人になった今も、気づけばまた同じ一杯を選んでいる。\n変わらない味、変わらない店内。\nここには、あの頃の自分に会える場所がある。",
       draft: false,
@@ -361,7 +361,7 @@ const SITE = {
     {
       id: "glow", no: "07",
       name: "GLOW -Amusement Bar-", nameEn: "",
-      cat: "FOOD", scene: "shelf", image: "assets/img/places/glow.webp?v=2", imageAlt: "ネオンの照明に照らされた GLOW -Amusement Bar- の店内とカウンター",
+      cat: "FOOD", scene: "shelf", image: "assets/img/places/glow.webp?v=3", imageAlt: "ネオンの照明に照らされた GLOW -Amusement Bar- の店内とカウンター",
       imageKeep: [0.05, 0.42, 0.75, 0.61],
       desc: "中標津に生まれた、まるで大人の秘密基地のような遊び場。\nカラオケにレトロゲーム、そしてずらりと並ぶボードゲーム。\n遊び方は十人十色。誰と来るかで、夜の楽しみ方も変わっていく。\nさて、今夜は何して遊ぶ？",
       draft: false,
@@ -379,9 +379,9 @@ const SITE = {
       id: "midorigaoka", no: "08",
       name: "中標津町緑ヶ丘森林公園", nameEn: "Midorigaoka Forest Park",
       cat: "NATURE", scene: "field",
-      image: "", imageAlt: "",   // 写真が届いたら 例: "assets/img/places/midorigaoka.webp"（空欄の間は演出用ビジュアル）
-      imageKeep: [],
-      desc: "街のすぐそばに、こんなにも豊かな自然があった。\n木々に囲まれた道を進めば、聞こえてくるのは森の音。\n忙しい毎日では気づかなかった、静かな時間。\n何気ない故郷の風景が、少し特別に思えてくる。",
+      image: "assets/img/places/midorigaoka.webp?v=3", imageAlt: "紅葉したカエデと白樺の林、ウッドデッキに置かれたベンチ",
+      imageKeep: [0.49, 0.62, 0.85, 0.88],   // ベンチと椅子
+      desc: "街のすぐそばに、こんなにも静かな森があった。\n木々に囲まれた道を進むたび、聞こえてくるのは風と葉の音。\n急がなくていい時間が、ここにはある。\n気づけば、心まで少し軽くなっていた。",
       draft: false,
       address: "北海道標津郡中標津町北中3番地16",
       season: "5月1日〜10月31日",   // 公園の開園期間（公式案内の記載。個別施設の利用期間とは別）
@@ -399,9 +399,9 @@ const SITE = {
       id: "asahigaoka", no: "09",
       name: "旭ヶ丘ふれあい公園", nameEn: "Asahigaoka Fureai Park",
       cat: "NATURE", scene: "town",
-      image: "", imageAlt: "",   // 例: "assets/img/places/asahigaoka.webp"
-      imageKeep: [],
-      desc: "かつて遊んだ、思い出の公園。\n久しぶりに訪れると、あの頃とは少し違う景色が広がっていた。\n変わっていくものと、変わらない思い出。\nここで遊ぶ子どもたちにも、いつか懐かしく思う日が来るのだろう。",
+      image: "assets/img/places/asahigaoka.webp?v=3", imageAlt: "青空と白い雲の下、芝生の先に並ぶ旭ヶ丘ふれあい公園の大型遊具",
+      imageKeep: [0.29, 0.42, 1.0, 0.725],   // 遊具と、そのすぐ上の空
+      desc: "かつて遊んだ、思い出の公園。\nあの頃より少し広く、少し違って見える景色。\nそれでも、ここに流れる空気はどこか懐かしい。\n新しい思い出は、きっと今もこの場所で生まれている。",
       draft: false,
       address: "北海道標津郡中標津町東17条南7丁目",
       hours: null, closed: null, price: null, access: null, parking: null, phone: null,
@@ -418,9 +418,9 @@ const SITE = {
       id: "yumenomori", no: "10",
       name: "道立ゆめの森公園", nameEn: "Yume no Mori Park",
       cat: "NATURE", scene: "panorama",
-      image: "", imageAlt: "",   // 例: "assets/img/places/yumenomori.webp"
-      imageKeep: [],
-      desc: "広い空の下に広がる、遊びと自然の世界。\n屋内にも屋外にも、夢中になれる場所がある。\n子どもの頃に感じた、あのワクワクする気持ち。\n大人になった今も、新しい発見が待っている。",
+      image: "assets/img/places/yumenomori.webp?v=3", imageAlt: "「ゆめの森公園 ビジターセンター」の看板と、青空の下のドーム型の建物",
+      imageKeep: [0.505, 0.47, 0.97, 0.705], // 看板「ゆめの森公園 ビジターセンター」
+      desc: "広い空の下に広がる、遊びと自然の世界。\n外でも中でも、心が動く場所がいくつもある。\n子どもの頃に感じた高鳴りは、今もきっと変わらない。\nここには、大人になってから出会う新しいワクワクがある。",
       draft: false,
       address: "北海道標津郡中標津町北中2番5号",
       season: "通年（屋外の設備には、季節によって利用できない期間があります）",   // 公園は通年。屋外設備の季節制限と混同しない

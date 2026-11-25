@@ -312,35 +312,51 @@ function fitImage(fig){
       if(!isFinite(pos))pos=50;
     }
   }
-  // ポスター：文字と看板が重なる場合は、文字を避けた範囲に看板が収まるよう写真を少し縮めて配置
+  // keep がどう切っても入らない場合：写真全体を収める（大きな余白）のではなく、keep がちょうど収まる倍率まで
+  // 縮めるだけにして、余白を最小限にする（縦長写真を横長の枠に出すときのぼかし余白を減らす）
   let safe=null;
+  if(contain&&box){
+    const kw=(box[2]-box[0])*im.naturalWidth,kh=(box[3]-box[1])*im.naturalHeight;
+    const cover=Math.max(W/im.naturalWidth,H/im.naturalHeight);
+    const sc=Math.min(cover,W/(kw*1.04),H/(kh*1.04));
+    const w2=im.naturalWidth*sc,h2=im.naturalHeight*sc;
+    const cx=(box[0]+box[2])/2*w2,cy=(box[1]+box[3])/2*h2;
+    const left=w2>=W?Math.min(0,Math.max(W-w2,W/2-cx)):(W-w2)/2;
+    const top=h2>=H?Math.min(0,Math.max(H-h2,H/2-cy)):(H-h2)/2;
+    safe={left,top,w:w2,h:h2,need:left>0.5||top>0.5||left+w2<W-0.5||top+h2<H-0.5};
+  }
+  // ポスター：文字と看板が重なる場合は、文字を避けた範囲に看板が収まるよう写真を少し縮めて配置
   if(box&&fig.querySelector(".poster-ui")){
     const fr=fig.getBoundingClientRect();
     const rel=e=>{const q=e&&e.getBoundingClientRect();return q&&q.width?{l:q.left-fr.left,t:q.top-fr.top,r:q.right-fr.left,b:q.bottom-fr.top}:null};
     const ep=rel(fig.querySelector(".p-ep")),ti=rel(fig.querySelector(".p-title")),cr=rel(fig.querySelector(".p-credit")),tg=rel(fig.querySelector(".p-tags"));
     const S={l:W*0.03,t:ep?ep.b+H*0.02:H*0.04,r:ti?ti.l-W*0.025:(tg?Math.min(W*0.97,tg.l+W):W*0.97),b:cr?cr.t-H*0.02:H*0.96};
     // 現在の配置（cover／contain）での重なりを計算
-    const scl=contain?Math.min(W/im.naturalWidth,H/im.naturalHeight):Math.max(W/im.naturalWidth,H/im.naturalHeight);
-    const dw=im.naturalWidth*scl,dh=im.naturalHeight*scl;
-    const ox=contain?(W-dw)/2:(vert?0:(W-dw)*pos/100), oy=contain?(H-dh)/2:(vert?(H-dh)*pos/100:0);
+    const scl=Math.max(W/im.naturalWidth,H/im.naturalHeight);
+    const dw=safe?safe.w:im.naturalWidth*scl,dh=safe?safe.h:im.naturalHeight*scl;
+    const ox=safe?safe.left:(vert?0:(W-dw)*pos/100), oy=safe?safe.top:(vert?(H-dh)*pos/100:0);
     const kb={l:ox+box[0]*dw,t:oy+box[1]*dh,r:ox+box[2]*dw,b:oy+box[3]*dh};
     const ovr=[ep,ti,cr,tg].filter(Boolean).reduce((s,q)=>s+Math.max(0,Math.min(kb.r,q.r)-Math.max(kb.l,q.l))*Math.max(0,Math.min(kb.b,q.b)-Math.max(kb.t,q.t)),0);
     const area=(kb.r-kb.l)*(kb.b-kb.t);
     if(ovr/area>0.02&&S.r-S.l>W*0.4&&S.b-S.t>H*0.4){
       const kw=(box[2]-box[0])*im.naturalWidth,kh=(box[3]-box[1])*im.naturalHeight;
       const cover=Math.max(W/im.naturalWidth,H/im.naturalHeight);
-      const sc=Math.min(cover,(S.r-S.l)/kw,(S.b-S.t)/kh);
+      const base=safe?safe.w/im.naturalWidth:cover;
+      const sc=Math.max(base*0.88,Math.min(base,(S.r-S.l)/kw,(S.b-S.t)/kh));   // 縮めるのは最大12%まで
       const w2=im.naturalWidth*sc,h2=im.naturalHeight*sc;
       let left=(S.l+S.r)/2-(box[0]+box[2])/2*w2, top=(S.t+S.b)/2-(box[1]+box[3])/2*h2;
       // 余白ができないよう枠いっぱいに寄せる。ただし寄せた結果、看板が文字側に戻ってしまう場合は寄せない
       const inS=(l,t)=>l+box[0]*w2>=S.l-1&&l+box[2]*w2<=S.r+1&&t+box[1]*h2>=S.t-1&&t+box[3]*h2<=S.b+1;
       if(w2>=W){const c=Math.min(0,Math.max(W-w2,left));if(inS(c,top))left=c}
       if(h2>=H){const c=Math.min(0,Math.max(H-h2,top));if(inS(left,c))top=c}
+      // 余白は縮めた分だけにする（写真を枠の外へずらして、片側に大きな余白を作らない）
+      left=Math.min(Math.max(left,Math.min(0,W-w2)),Math.max(0,W-w2));
+      top=Math.min(Math.max(top,Math.min(0,H-h2)),Math.max(0,H-h2));
       const gap=left>0.5||top>0.5||left+w2<W-0.5||top+h2<H-0.5;
       safe={left,top,w:w2,h:h2,need:gap};
     }
   }
-  const useBd=contain||(safe&&safe.need);
+  const useBd=safe?safe.need:contain;
   fig.classList.toggle("fit-contain",!!useBd);
   if(safe){
     Object.assign(im.style,{objectFit:"fill",objectPosition:"",left:safe.left.toFixed(1)+"px",top:safe.top.toFixed(1)+"px",width:safe.w.toFixed(1)+"px",height:safe.h.toFixed(1)+"px",right:"auto",bottom:"auto"});
@@ -398,7 +414,7 @@ function storyCard(ep){
       ${posterTitle(ep)}<span class="p-credit">NAKASHIBETSU URASHIMA STORY<br>EPISODE ${ep.no}${ep.titleEn?` — ${esc(ep.titleEn)}`:""}</span></div>
     </figure>
     <div class="story-meta"><p class="story-cat"><span>${esc(ep.category)}</span>${esc(ep.categoryJa)}</p>
-      <h3 class="story-title"><span class="sr">EP.${ep.no} </span>${esc(ep.title)}</h3>${COPY(ep,"story-copy")}<p class="story-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
+      <h3 class="story-title"><span class="sr">EP.${ep.no} </span>${esc(ep.title)}</h3>${COPY(ep,"story-copy")}<p class="story-lead">${esc((ep.lead||"").replace(/\n+/g,""))}${DRAFT(ep.draft)}</p>
       ${pls.length?`<p class="story-places">登場スポット：${pls.map(p=>esc(p.name)).join("、")}</p>`:""}
       <span class="story-more">エピソードを見る<i aria-hidden="true">→</i></span></div></a></article>`;
 }
@@ -552,7 +568,7 @@ function storySheet(ep){
       <h2 class="sd-title" id="sheetTitle"><span class="sd-no">EP.${ep.no}</span>${esc(ep.title)}</h2>
       ${ep.titleEn?`<p class="sd-en">${esc(ep.titleEn)}</p>`:""}
       ${COPY(ep,"sd-copy")}
-      <p class="sd-lead">${esc(ep.lead)}${DRAFT(ep.draft)}</p>
+      <p class="sd-lead">${(ep.lead||"").split(/\n+/).map(esc).join("<br>")}${DRAFT(ep.draft)}</p>
       ${watchBtns(ep)}
       ${pls.length?`<h3 class="sd-h">LOCATIONS<span>この回に登場した場所</span></h3>
       <ul class="sd-places">${pls.map(p=>`<li><a href="#spot-${p.id}" data-open="spot-${p.id}">

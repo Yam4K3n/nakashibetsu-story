@@ -11,7 +11,7 @@
 
 | 項目 | ルール |
 |---|---|
-| 写真の形式 | **JPEG（.jpg）** または **WebP（.webp）**。画質 80% 前後で書き出し（現在の EP.01〜07 の写真は WebP。EP.08〜10 は写真未設定） |
+| 写真の形式 | **JPEG（.jpg）** または **WebP（.webp）**。画質 80% 前後で書き出し（現在の EP.01〜10 の写真は WebP） |
 | 写真の重さ | **1枚 500KB 以内**が目安（重いとスマホで表示が遅くなります） |
 | 動画の形式 | **MP4（H.264）**、音声なし |
 | ファイル名 | **半角の英小文字・数字・ハイフンだけ**（例: `ep-04.jpg`）。日本語・スペース・大文字は使わない |
@@ -139,21 +139,34 @@ imageKeep: [0.04, 0.38, 0.44, 0.60],   // [左, 上, 右, 下]
 
 ---
 
-## EP.08〜10 の写真を追加する（写真が届いたら）
+## 写真の色調（全10話で統一）
 
-いまは写真が未設定のため、演出用のイラストに「ILLUSTRATION · イメージ図」（ポスターは「イメージ図」）と小さく表示しています。写真を設定するとこの表示は自動で消えます。
+全10話の写真は「CINEMATIC × NOSTALGIC × EMOTIONAL」の色調にそろえています（2026-11-25）。
+写真の内容（被写体・看板・文字・構図）は変えず、色・明暗・粒子だけを調整しています。
 
-| 置く場所 | ファイル名の例 | data.js の書き方 |
-|---|---|---|
-| `assets/img/episodes/` | `ep-08-forest-park.webp`（縦長 4:5） | EP.08 の `image: "assets/img/episodes/ep-08-forest-park.webp"` |
-| `assets/img/episodes/` | `ep-09-asahigaoka.webp` | EP.09 の `image` |
-| `assets/img/episodes/` | `ep-10-yumenomori.webp` | EP.10 の `image` |
-| `assets/img/places/` | `midorigaoka.webp`（横長 16:10） | スポット `midorigaoka` の `image` |
-| `assets/img/places/` | `asahigaoka.webp` | スポット `asahigaoka` の `image` |
-| `assets/img/places/` | `yumenomori.webp` | スポット `yumenomori` の `image` |
+- 彩度を少し落ち着かせ、明るすぎる部分をなだらかに抑え、暗部に深みを出す
+- 青空は少し映画的な青へ、緑は深緑寄りへ、照明・紅葉・れんがの暖色はそのまま
+- うっすらとしたフィルムグレイン
+- 種類ごとに強さを変えています：`nature`（自然・屋外）／`shop`（飲食店）／`night`（GLOW など夜の店内）／`film`（EP.08〜10 のように、すでにフィルム調の写真）
 
-あわせて `imageAlt`（写真の内容）と、看板などがあれば `imageKeep`（欠けてはいけない範囲）を書いてください。
+### EP.11 以降の写真を同じ色調で追加する
+
+`tools/photo_grade.py` で、同じ色調・同じサイズの WebP を書き出せます（Python 3 と numpy・Pillow が必要）。
+
+```
+python3 tools/photo_grade.py 元写真.jpg nature ep-11-xxxx --place xxxx
+```
+
+- `assets/img/episodes/ep-11-xxxx.webp`（ポスター用 4:5・1000×1250）と `assets/img/places/xxxx.webp`（スポット用）ができます
+- 切り抜き位置を選ぶときは `--crop 左,上,右,下`（元写真のピクセル）を付けます。省くと中央を 4:5 で切り抜きます
+- できたファイルを `data.js` の `image` に書き、`imageAlt`（写真の内容）と `imageKeep`（看板など欠けてはいけない範囲）を設定します
+- Python が使えない場合は、写真をそのまま WebP／JPEG にして登録しても表示されます（色調だけ他の回と少し違って見えます）
+
 **撮影者本人の写真、または利用許可を確認した写真だけ**を使ってください。第三者の写真を使う場合は、PHOTO CREDITS と `PHOTO-CREDITS.md` にクレジットを追加します。
+
+### 写真を差し替えたら
+
+同じファイル名で上書きした場合は、`data.js` のパスの末尾の `?v=3` を `?v=4` のように変えてください（閲覧者のブラウザに古い写真が残らないようにするため）。
 
 ## うまく表示されないとき
 

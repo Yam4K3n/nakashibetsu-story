@@ -188,6 +188,54 @@ const SITE = {
       instagram: "https://www.instagram.com/reel/De1NtArT_mv/",
       published: "",
       places: ["glow"]
+    },
+    {
+      id: "ep-08", no: "08",
+      title: "森林公園", titleEn: "MIDORIGAOKA FOREST PARK",
+      category: "FIND", categoryJa: "違いを探す",   // カテゴリは仮（変更可）
+      copy: "森の中には、忘れていた時間が流れていた。",
+      lead: "街のすぐそばに広がる、緑豊かな森林公園。木々に囲まれた静かな空間で、故郷の自然ともう一度向き合う。",
+      draft: false,
+      image: "",            // 写真が届いたら 例: "assets/img/episodes/ep-08-forest-park.webp"（空欄の間は演出用ビジュアル）
+      imageAlt: "",         // 例: "木々に囲まれた中標津町緑ヶ丘森林公園の散策路"
+      imageKeep: [],        // 看板など、欠けてはいけない範囲 [左,上,右,下]（写真を入れたら設定）
+      scene: "field",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7700901387663658261",
+      instagram: "https://www.instagram.com/p/De8771gTDxh/",
+      published: "",
+      places: ["midorigaoka"]
+    },
+    {
+      id: "ep-09", no: "09",
+      title: "旭ヶ丘ふれあい公園", titleEn: "ASAHIGAOKA FUREAI PARK",
+      category: "FIND", categoryJa: "違いを探す",   // カテゴリは仮（変更可）
+      copy: "あの頃の遊び場は、今も誰かの思い出をつくっている。",
+      lead: "子どもの頃に親しんだ公園。変わった景色と、変わらない懐かしさ。時が流れても、ここには新しい思い出が生まれ続けている。",
+      draft: false,
+      image: "",            // 例: "assets/img/episodes/ep-09-asahigaoka.webp"
+      imageAlt: "",
+      imageKeep: [],
+      scene: "town",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7707619095734144262",
+      instagram: "https://www.instagram.com/p/Dfrj-afTTgq/",
+      published: "",
+      places: ["asahigaoka"]
+    },
+    {
+      id: "ep-10", no: "10",
+      title: "ゆめの森公園", titleEn: "YUME NO MORI PARK",
+      category: "FIND", categoryJa: "違いを探す",   // カテゴリは仮（変更可）
+      copy: "あの頃のワクワクは、大人になっても変わらない。",
+      lead: "空港のすぐそばに広がる、遊びと自然が出会う場所。子どもも大人も夢中になれる空間で、今の中標津の新しい魅力を見つける。",
+      draft: false,
+      image: "",            // 例: "assets/img/episodes/ep-10-yumenomori.webp"
+      imageAlt: "",
+      imageKeep: [],
+      scene: "panorama",
+      tiktok: "https://www.tiktok.com/@nakashibetsu_story/video/7710571445444758790",
+      instagram: "https://www.instagram.com/p/DgACLgwzBzE/",
+      published: "",
+      places: ["yumenomori"]
     }
   ],
 
@@ -200,6 +248,8 @@ const SITE = {
        official 公式サイトURL（officialLabel で表示名を変更可）
        sns 公式SNSのURL（snsLabel で表示名を変更可）   ref 参考にした情報源（表示しません）
        checkedAt 情報を確認した日（例: "2026-11-01"）→「◯◯時点の情報」と表示されます
+       season   開園期間（公園など。公園全体の期間を書き、個別施設・遊具の利用期間とは分ける）
+       notice   所在地などの下に出す短い案内（例: 訪問前に公式情報をご確認ください）
      mapQuery : Googleマップで検索する語句（施設名など）
      lat, lng : 確認済みの座標。入れるとGoogleマップでピンポイント表示になります
      schematic: 概略図上の表示位置 [横%, 縦%]（演出用。実際の位置ではありません）
@@ -324,6 +374,65 @@ const SITE = {
       mapQuery: "GLOW Amusement Bar 中標津 大通北2丁目1 MYビル",
       lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
       schematic: [67, 55]
+    },
+    {
+      id: "midorigaoka", no: "08",
+      name: "中標津町緑ヶ丘森林公園", nameEn: "Midorigaoka Forest Park",
+      cat: "NATURE", scene: "field",
+      image: "", imageAlt: "",   // 写真が届いたら 例: "assets/img/places/midorigaoka.webp"（空欄の間は演出用ビジュアル）
+      imageKeep: [],
+      desc: "街のすぐそばに、こんなにも豊かな自然があった。\n木々に囲まれた道を進めば、聞こえてくるのは森の音。\n忙しい毎日では気づかなかった、静かな時間。\n何気ない故郷の風景が、少し特別に思えてくる。",
+      draft: false,
+      address: "北海道標津郡中標津町北中3番地16",
+      season: "5月1日〜10月31日",   // 公園の開園期間（公式案内の記載。個別施設の利用期間とは別）
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: "https://www.nakashibetsu.jp/shisetsu_koutsu/shisetsu/kankou_kouen/midorigaoka_shirinpark/", officialLabel: "中標津町 施設案内",
+      sns: null,
+      ref: null,
+      notice: "施設の利用状況は、訪問前に公式情報をご確認ください。",
+      checkedAt: null,
+      mapQuery: "中標津町緑ヶ丘森林公園 北海道標津郡中標津町北中3番地16",
+      lat: null, lng: null,   // 座標は未確認のため空欄（Googleマップは mapQuery で検索）
+      schematic: [29, 60]
+    },
+    {
+      id: "asahigaoka", no: "09",
+      name: "旭ヶ丘ふれあい公園", nameEn: "Asahigaoka Fureai Park",
+      cat: "NATURE", scene: "town",
+      image: "", imageAlt: "",   // 例: "assets/img/places/asahigaoka.webp"
+      imageKeep: [],
+      desc: "かつて遊んだ、思い出の公園。\n久しぶりに訪れると、あの頃とは少し違う景色が広がっていた。\n変わっていくものと、変わらない思い出。\nここで遊ぶ子どもたちにも、いつか懐かしく思う日が来るのだろう。",
+      draft: false,
+      address: "北海道標津郡中標津町東17条南7丁目",
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: "https://www.nakashibetsu.jp/shisetsu_koutsu/shisetsu/kankou_kouen/asahigaoka_fureaipark/", officialLabel: "中標津町 施設案内",
+      sns: null,
+      ref: null,
+      notice: "施設の利用状況は、訪問前に公式情報をご確認ください。",
+      checkedAt: null,
+      mapQuery: "旭ヶ丘ふれあい公園 北海道標津郡中標津町東17条南7丁目",
+      lat: null, lng: null,
+      schematic: [76, 30]
+    },
+    {
+      id: "yumenomori", no: "10",
+      name: "道立ゆめの森公園", nameEn: "Yume no Mori Park",
+      cat: "NATURE", scene: "panorama",
+      image: "", imageAlt: "",   // 例: "assets/img/places/yumenomori.webp"
+      imageKeep: [],
+      desc: "広い空の下に広がる、遊びと自然の世界。\n屋内にも屋外にも、夢中になれる場所がある。\n子どもの頃に感じた、あのワクワクする気持ち。\n大人になった今も、新しい発見が待っている。",
+      draft: false,
+      address: "北海道標津郡中標津町北中2番5号",
+      season: "通年（屋外の設備には、季節によって利用できない期間があります）",   // 公園は通年。屋外設備の季節制限と混同しない
+      hours: null, closed: null, price: null, access: null, parking: null, phone: null,
+      official: "https://www.pref.hokkaido.lg.jp/kn/tkn/kgs/homepage/ko/itiran_nakasibetu_index.html", officialLabel: "北海道 道立公園案内",
+      sns: null,
+      ref: null,
+      notice: "遊具・屋外設備の利用状況は、訪問前に公式情報をご確認ください。",
+      checkedAt: null,
+      mapQuery: "道立ゆめの森公園 北海道標津郡中標津町北中2番5号",
+      lat: null, lng: null,
+      schematic: [62, 82]
     }
   ]
 };

@@ -11,7 +11,7 @@
 
 | 項目 | ルール |
 |---|---|
-| 写真の形式 | **JPEG（.jpg）** または **WebP（.webp）**。画質 80% 前後で書き出し（現在の EP.01〜07 の写真は WebP） |
+| 写真の形式 | **JPEG（.jpg）** または **WebP（.webp）**。画質 80% 前後で書き出し（現在の EP.01〜07 の写真は WebP。EP.08〜10 は写真未設定） |
 | 写真の重さ | **1枚 500KB 以内**が目安（重いとスマホで表示が遅くなります） |
 | 動画の形式 | **MP4（H.264）**、音声なし |
 | ファイル名 | **半角の英小文字・数字・ハイフンだけ**（例: `ep-04.jpg`）。日本語・スペース・大文字は使わない |
@@ -138,6 +138,22 @@ imageKeep: [0.04, 0.38, 0.44, 0.60],   // [左, 上, 右, 下]
 表示が変わらないときは、ブラウザで再読み込み（スマホは一度タブを閉じて開き直す）してください。
 
 ---
+
+## EP.08〜10 の写真を追加する（写真が届いたら）
+
+いまは写真が未設定のため、演出用のイラストに「ILLUSTRATION · イメージ図」（ポスターは「イメージ図」）と小さく表示しています。写真を設定するとこの表示は自動で消えます。
+
+| 置く場所 | ファイル名の例 | data.js の書き方 |
+|---|---|---|
+| `assets/img/episodes/` | `ep-08-forest-park.webp`（縦長 4:5） | EP.08 の `image: "assets/img/episodes/ep-08-forest-park.webp"` |
+| `assets/img/episodes/` | `ep-09-asahigaoka.webp` | EP.09 の `image` |
+| `assets/img/episodes/` | `ep-10-yumenomori.webp` | EP.10 の `image` |
+| `assets/img/places/` | `midorigaoka.webp`（横長 16:10） | スポット `midorigaoka` の `image` |
+| `assets/img/places/` | `asahigaoka.webp` | スポット `asahigaoka` の `image` |
+| `assets/img/places/` | `yumenomori.webp` | スポット `yumenomori` の `image` |
+
+あわせて `imageAlt`（写真の内容）と、看板などがあれば `imageKeep`（欠けてはいけない範囲）を書いてください。
+**撮影者本人の写真、または利用許可を確認した写真だけ**を使ってください。第三者の写真を使う場合は、PHOTO CREDITS と `PHOTO-CREDITS.md` にクレジットを追加します。
 
 ## うまく表示されないとき
 

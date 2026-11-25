@@ -218,6 +218,9 @@ function paintCanvas(fig){
   const rect=fig.getBoundingClientRect();if(rect.width<2||rect.height<2)return;
   let cv=fig.querySelector("canvas");
   if(!cv){cv=document.createElement("canvas");cv.setAttribute("aria-hidden","true");fig.prepend(cv);
+    // 写真が未設定のエピソード・スポットは、演出用のイラストであることを小さく表示（実際の写真と誤認させない）
+    const noPhoto=fig.hasAttribute("data-src")&&!fig.dataset.src;
+    if(noPhoto&&!SITE.showDraftLabels&&!fig.closest(".poster")){const t=document.createElement("span");t.className="ph-tag";t.textContent="ILLUSTRATION · イメージ図";fig.appendChild(t)}
     if(SITE.showDraftLabels&&!fig.closest(".poster")){
       if(fig.classList.contains("hero-media")){
         // ファーストビューは文字と重ならないよう、左上のメタ情報の行に表示
@@ -371,7 +374,7 @@ function gmapsURL(p){
 }
 const pending = txt => `<span class="muted">${txt||"確認中"}</span>`;
 const DRAFT = cond => SITE.showDraftLabels && cond ? '<span class="draft">仮テキスト</span>' : "";
-const PH = img => SITE.showDraftLabels && !img ? '<span class="p-ph">仮イメージ</span>' : "";
+const PH = img => img ? "" : SITE.showDraftLabels ? '<span class="p-ph">仮イメージ</span>' : '<span class="p-ph">イメージ図</span>';   // 写真が未設定の間はイラストであることを表示
 // 演出用ビジュアルである旨はフッターに一括表記（各画面には制作途中の表示を出さない）
 document.documentElement.classList.toggle("show-draft", !!SITE.showDraftLabels);
 // ポスターに縦書きで載せるタイトル（長い名前は posterTitle で短くできます）
@@ -461,7 +464,7 @@ mapBox.innerHTML=buildMapSVG()+`<span class="map-tag">SCHEMATIC<span>演出用�
 spotIdx.innerHTML=SITE.places.map(p=>`<button data-id="${p.id}" aria-pressed="false"><b>${p.no}</b>${esc(p.name)}</button>`).join("");
 
 /* 観光情報：確認できた項目だけを表示（未入力の項目は出さない） */
-const FACT_FIELDS=[["address","所在地"],["hours","営業時間"],["closed","定休日"],["price","料金"],["access","アクセス"],["parking","駐車場"],["phone","電話"]];
+const FACT_FIELDS=[["address","所在地"],["season","開園期間"],["hours","営業時間"],["closed","定休日"],["price","料金"],["access","アクセス"],["parking","駐車場"],["phone","電話"]];
 function factsHTML(p){
   const eps=PLACE_EPS[p.id];
   const rows=FACT_FIELDS.filter(([k])=>p[k]).map(([k,l])=>{
@@ -482,7 +485,8 @@ function factsHTML(p){
     rows.push(`<dt>登場</dt><dd>${recent.map(e=>`<a href="#${e.id}" data-open="${e.id}">EP.${e.no}「${esc(e.title)}」</a>`).join("<br>")}${more>0?`<br><span class="muted">ほか${more}話</span>`:""}</dd>`);
   }
   const note=p.checkedAt?`<p class="facts-note">掲載情報は${fmtDate(p.checkedAt)}時点のものです。訪問前に公式情報もご確認ください。</p>`:"";
-  return (rows.length?`<dl class="facts">${rows.join("")}</dl>`:"")+note;
+  const notice=p.notice?`<p class="facts-note">${esc(p.notice)}</p>`:"";
+  return (rows.length?`<dl class="facts">${rows.join("")}</dl>`:"")+note+notice;
 }
 function gmapsBtn(p,cls="btn solid"){
   const u=gmapsURL(p);
@@ -492,6 +496,7 @@ function gmapsBtn(p,cls="btn solid"){
 function selectSpot(id){
   const p=PL[id];if(!p)return;
   mapBox.querySelectorAll(".pin").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
+  fitPinLabel(mapBox.querySelector(`.pin[data-id="${id}"]`));
   spotIdx.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
   revealChip(spotIdx,spotIdx.querySelector(`button[data-id="${id}"]`));
   panel.innerHTML=`<figure class="frame" data-scene="${p.scene}" data-seed="pl-${p.id}" data-src="${esc(p.image)}" data-alt="${esc(p.imageAlt||p.name)}" data-keep="${esc((p.imageKeep||[]).join(","))}"></figure>
@@ -502,6 +507,18 @@ function selectSpot(id){
   ${p.lat==null&&gmapsURL(p)?'<p class="gm-note">Googleマップでは、施設名と所在地で検索した結果が開きます。</p>':""}</div>`;
   paintFrame(panel.querySelector(".frame"),true);
 }
+/* 選択中・ホバー中のスポット名が地図の端からはみ出す場合だけ、内側へ寄せる（はみ出さないものは動かさない） */
+function fitPinLabel(b){
+  const l=b&&b.querySelector(".pin-label");if(!l)return;
+  l.style.transform="";
+  const r=l.getBoundingClientRect(),m=mapBox.getBoundingClientRect();if(!r.width)return;
+  const pad=4,dx=r.left<m.left+pad?m.left+pad-r.left:r.right>m.right-pad?m.right-pad-r.right:0;
+  if(dx)l.style.transform=`translateX(calc(-50% + ${dx.toFixed(1)}px))`;
+}
+// フォントの読み込みや画面の回転でスポット名の幅が変わったら、そのたびに寄せ直す
+if(window.ResizeObserver){const labRO=new ResizeObserver(es=>es.forEach(e=>fitPinLabel(e.target.closest(".pin"))));mapBox.querySelectorAll(".pin-label").forEach(l=>labRO.observe(l))}
+if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener("loadingdone",()=>[80,400].forEach(t=>setTimeout(()=>fitPinLabel(mapBox.querySelector('.pin[aria-pressed="true"]')),t)));
+mapBox.addEventListener("pointerover",e=>{const b=e.target.closest(".pin");if(b)fitPinLabel(b)});
 mapBox.addEventListener("click",e=>{const b=e.target.closest(".pin");if(b)selectSpot(b.dataset.id)});
 spotIdx.addEventListener("click",e=>{const b=e.target.closest("button");if(b)selectSpot(b.dataset.id)});
 
@@ -691,4 +708,4 @@ watchFrames();
 vidIO.observe(document.querySelector(".hero-media"));
 selectSpot(SITE.places[0].id);
 {const t=decodeURIComponent(location.hash.slice(1));if(t&&(t==="episodes"||EP[t]||t.startsWith("spot-"))){try{history.replaceState(null,"",location.pathname+location.search)}catch(_){}openSheet(t)}}
-let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>document.querySelectorAll(".frame[data-done]").forEach(f=>{if(f.querySelector("img")){fitImage(f);return}if(f.querySelector("video"))return;const w=f.getBoundingClientRect().width;if(Math.abs(w-(+f.dataset.w||0))>w*.15)paintFrame(f,true)}),220)});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>(fitPinLabel(mapBox.querySelector('.pin[aria-pressed="true"]')),document.querySelectorAll(".frame[data-done]").forEach(f=>{if(f.querySelector("img")){fitImage(f);return}if(f.querySelector("video"))return;const w=f.getBoundingClientRect().width;if(Math.abs(w-(+f.dataset.w||0))>w*.15)paintFrame(f,true)})),220)});
